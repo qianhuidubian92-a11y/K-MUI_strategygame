@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>K@MUI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c0d10;
+    --panel:#15171d;
+    --panel2:#1c1f27;
+    --line:#333846;
+    --gold:#c9a24b;
+    --gold-dim:#8a733a;
+    --paper:#e9e3d3;
+    --paper-dim:#a7a08d;
+    --p1:#4c7fb8;
+    --p1-dim:#2c4a68;
+    --p2:#a5333a;
+    --p2-dim:#5c2226;
+    --plain:#333c2a;
+    --forest:#1c3324;
+    --hill:#4a3d28;
+    --danger:#c04a3f;
+    --ok:#5c9c6b;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--ink);color:var(--paper);
+    font-family:'Zen Kaku Gothic New',sans-serif; overflow:hidden;}
+  h1,h2,h3,.mincho{font-family:'Shippori Mincho',serif;}
+  button{font-family:inherit;cursor:pointer;}
+  #app{position:relative;width:100%;height:100%;}
+  .screen{position:absolute;inset:0;display:none;}
+  .screen.active{display:flex;}
+
+  /* ---------- HOME ---------- */
+  #screen-home{flex-direction:column;align-items:center;justify-content:center;
+    background:
+      radial-gradient(ellipse at 50% 20%, #22140f 0%, transparent 60%),
+      linear-gradient(180deg,#0c0d10 0%, #08090b 100%);
+    position:relative;}
+  #screen-home::before{content:"";position:absolute;inset:0;opacity:.06;
+    background-image:repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 90px);
+    pointer-events:none;}
+  .kamui-title{font-size:clamp(56px,12vw,120px);font-weight:800;letter-spacing:.08em;
+    color:var(--gold); margin:0; text-shadow:0 0 40px rgba(201,162,75,.35);}
+  .kamui-sub{color:var(--paper-dim);letter-spacing:.35em;font-size:13px;margin-top:6px;margin-bottom:56px;}
+  .home-btns{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;padding:0 24px;}
+  .banner-btn{
+    width:230px;padding:26px 18px;background:linear-gradient(180deg,var(--panel2),var(--panel));
+    border:1px solid var(--gold-dim); color:var(--paper); text-align:center; border-radius:2px;
+    position:relative; transition:transform .15s, border-color .15s, box-shadow .15s;}
+  .banner-btn:hover{transform:translateY(-4px); border-color:var(--gold); box-shadow:0 8px 24px rgba(0,0,0,.5);}
+  .banner-btn .bt-title{font-family:'Shippori Mincho',serif;font-size:22px;font-weight:700;color:var(--gold);}
+  .banner-btn .bt-desc{font-size:12px;color:var(--paper-dim);margin-top:8px;line-height:1.6;}
+  .home-foot{position:absolute;bottom:18px;font-size:11px;color:#5b5748;letter-spacing:.15em;}
+
+  .modal-back{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50;}
+  .modal-back.active{display:flex;}
+  .modal{background:var(--panel);border:1px solid var(--gold-dim);padding:28px 26px;width:320px;border-radius:2px;}
+  .modal h3{margin:0 0 14px;color:var(--gold);font-size:18px;}
+  .modal input{width:100%;padding:10px;background:var(--ink);border:1px solid var(--line);color:var(--paper);
+    font-size:15px;border-radius:2px;margin-bottom:14px;}
+  .modal-row{display:flex;gap:10px;justify-content:flex-end;}
+  .btn-mini{padding:8px 16px;background:var(--panel2);border:1px solid var(--line);color:var(--paper);border-radius:2px;font-size:13px;}
+  .btn-mini.gold{background:var(--gold-dim);border-color:var(--gold);color:#161208;font-weight:700;}
+  .modal-note{font-size:11px;color:var(--paper-dim);line-height:1.6;margin-top:-6px;margin-bottom:14px;}
+
+  /* ---------- SETUP ---------- */
+  #screen-setup{flex-direction:column; background:var(--ink);}
+  .setup-head{padding:16px 26px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:18px;}
+  .setup-head h2{color:var(--gold);margin:0;font-size:22px;}
+  .setup-head span{color:var(--paper-dim);font-size:12px;}
+  .setup-body{flex:1;display:flex;overflow:hidden;}
+  .race-col{width:210px;border-right:1px solid var(--line);overflow-y:auto;padding:14px 0;flex-shrink:0;}
+  .race-item{padding:14px 20px;cursor:pointer;border-left:3px solid transparent;}
+  .race-item:hover{background:var(--panel);}
+  .race-item.sel{border-left-color:var(--gold);background:var(--panel2);}
+  .race-item .rname{font-family:'Shippori Mincho',serif;font-weight:700;font-size:16px;}
+  .race-item .rdesc{font-size:11px;color:var(--paper-dim);margin-top:4px;line-height:1.5;}
+  .squads-col{flex:1;overflow-y:auto;padding:18px 22px;}
+  .squad-card{background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:14px 16px;margin-bottom:12px;}
+  .squad-card.taisho{border-color:var(--gold-dim);}
+  .sc-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .sc-badge{width:26px;height:26px;border-radius:50%;background:var(--gold-dim);color:#161208;font-weight:900;
+    display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+  .sc-badge.taisho{background:var(--gold);}
+  .sc-name{font-weight:700;font-size:14px;}
+  .sc-tag{font-size:10px;color:var(--gold);border:1px solid var(--gold-dim);padding:1px 6px;border-radius:8px;}
+  .sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .sc-field label{display:block;font-size:10px;color:var(--paper-dim);margin-bottom:4px;letter-spacing:.05em;}
+  .sc-field select{width:100%;padding:7px 8px;background:var(--ink);border:1px solid var(--line);color:var(--paper);
+    font-size:12px;border-radius:2px;}
+  .sc-stats{margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--paper-dim);flex-wrap:wrap;}
+  .sc-stats b{color:var(--paper);}
+  .setup-foot{padding:14px 26px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:12px;}
+  .btn-main{padding:12px 30px;background:var(--gold);border:none;color:#171208;font-weight:900;border-radius:2px;font-size:14px;letter-spacing:.05em;}
+  .btn-main:disabled{opacity:.35;cursor:default;}
+  .btn-ghost{padding:12px 22px;background:transparent;border:1px solid var(--line);color:var(--paper-dim);border-radius:2px;font-size:13px;}
+
+  /* ---------- BATTLE ---------- */
+  #screen-battle{flex-direction:column;background:var(--ink);}
+  .bt-top{display:flex;align-items:center;padding:8px 18px;border-bottom:1px solid var(--line);gap:22px;background:var(--panel);flex-shrink:0;}
+  .clock{display:flex;align-items:center;gap:8px;}
+  .clock .dot{width:9px;height:9px;border-radius:50%;}
+  .clock .dot.day{background:#e8c25a;box-shadow:0 0 8px #e8c25a;}
+  .clock .dot.night{background:#5a7ce8;box-shadow:0 0 8px #5a7ce8;}
+  .clock b{font-size:18px;font-family:'Shippori Mincho',serif;letter-spacing:.05em;}
+  .bt-top .divider{width:1px;height:20px;background:var(--line);}
+  .turnphase{font-size:12px;color:var(--gold);letter-spacing:.05em;}
+  .bt-top .spacer{flex:1;}
+  .bt-top .exitbtn{font-size:11px;color:var(--paper-dim);border:1px solid var(--line);padding:5px 10px;border-radius:2px;background:transparent;}
+
+  .bt-body{flex:1;display:flex;overflow:hidden;position:relative;}
+  .map-wrap{flex:1;overflow:auto;background:#08090b;display:flex;align-items:center;justify-content:center;position:relative;}
+  .map-wrap.shake{animation:mapshake .35s ease;}
+  @keyframes mapshake{
+    0%{transform:translate(0,0);} 20%{transform:translate(-6px,3px);} 40%{transform:translate(5px,-3px);}
+    60%{transform:translate(-4px,2px);} 80%{transform:translate(3px,-1px);} 100%{transform:translate(0,0);}
+  }
+  #hit-flash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center, rgba(192,74,63,.35), transparent 70%);opacity:0;z-index:40;}
+  #hit-flash.flashnow{animation:flashfade .35s ease-out;}
+  @keyframes flashfade{ 0%{opacity:.9;} 100%{opacity:0;} }
+  .audio-btn{font-size:11px;color:var(--paper-dim);border:1px solid var(--line);padding:5px 10px;border-radius:2px;background:transparent;}
+  .audio-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .map-wrap svg{max-width:100%;max-height:100%;}
+  .hex{stroke:#05060a;stroke-width:1.4;cursor:default;}
+  .hex-rim{fill:none;stroke:rgba(255,255,255,.05);stroke-width:1;pointer-events:none;}
+  .hex.reachable{cursor:pointer;}
+  .reach-overlay{fill:#6fc2d8;opacity:.16;pointer-events:none;}
+  .reach-ring{fill:none;stroke:#6fc2d8;stroke-width:1.6;stroke-dasharray:4 3;opacity:.85;pointer-events:none;animation:dashmove 1.4s linear infinite;}
+  .rest-ring{fill:none;stroke:var(--gold);stroke-width:1.8;stroke-dasharray:3 3;opacity:.9;pointer-events:none;animation:dashmove 1.6s linear infinite;}
+  @keyframes dashmove{ to{ stroke-dashoffset:-14; } }
+  .quickatk-ring{fill:none;stroke:var(--danger);stroke-width:2;opacity:.9;pointer-events:none;animation:pulsering 1s ease-in-out infinite;}
+  @keyframes pulsering{ 0%,100%{opacity:.55;} 50%{opacity:1;} }
+  .fog{fill:#000;opacity:.87;pointer-events:none;}
+  .unit-icon{cursor:pointer;}
+  .unit-icon.targetable, .unit-icon.quickatk{cursor:crosshair;}
+  .unit-icon:hover .unit-badge{filter:brightness(1.2);}
+  .unit-badge{stroke:#05060a;stroke-width:1.6;}
+  .unit-badge.taisho{stroke:var(--gold);stroke-width:2.4;}
+  .facing-flag{pointer-events:none;fill:#fff;stroke:#05060a;stroke-width:.6;}
+  .hp-bg{fill:#05060a;opacity:.7;}
+  .hp-fill{transition:width .3s;}
+  .unit-label{font-size:10px;fill:#fff;font-weight:900;pointer-events:none;text-shadow:0 1px 2px #000;font-family:'Shippori Mincho',serif;}
+  .target-glow{fill:none;stroke:var(--danger);stroke-width:2.4;opacity:.9;pointer-events:none;animation:pulsering .9s ease-in-out infinite;}
+  .select-ring-outer{fill:none;stroke:var(--gold);stroke-width:1;opacity:.6;pointer-events:none;}
+  .select-ring-inner{fill:none;stroke:var(--gold);stroke-width:2.4;pointer-events:none;}
+  .tree-icon,.hill-icon{pointer-events:none;}
+
+  .side-panel{width:300px;border-left:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;flex-shrink:0;}
+  .side-scroll{flex:1;overflow-y:auto;padding:10px;}
+  .unit-row{background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:9px 10px;margin-bottom:8px;cursor:pointer;}
+  .unit-row.mine{border-left:3px solid var(--p1);}
+  .unit-row.enemy{border-left:3px solid var(--p2);}
+  .unit-row.selected{background:#26293a;border-color:var(--gold);}
+  .unit-row.dead{opacity:.35;}
+  .unit-row.acted{opacity:.55;}
+  .ur-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;}
+  .ur-bars{margin-top:6px;display:flex;flex-direction:column;gap:4px;}
+  .bar-track{height:6px;background:#0c0d10;border-radius:3px;overflow:hidden;}
+  .bar-fill{height:100%;}
+  .ur-stats{display:flex;gap:8px;margin-top:6px;font-size:10px;color:var(--paper-dim);}
+  .ur-status{font-size:10px;margin-top:4px;color:var(--danger);}
+
+  .action-panel{border-top:1px solid var(--line);padding:12px 12px 14px;}
+  .action-panel h4{margin:0 0 8px;font-size:12px;color:var(--gold);letter-spacing:.05em;}
+  .act-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+  .act-btn{padding:9px 4px;background:var(--panel2);border:1px solid var(--line);color:var(--paper);font-size:12px;border-radius:2px;}
+  .act-btn.chosen{background:var(--gold-dim);color:#161208;font-weight:700;border-color:var(--gold);}
+  .act-btn:disabled{opacity:.3;}
+  .act-hint{font-size:10px;color:var(--paper-dim);line-height:1.5;min-height:28px;}
+  .confirm-row{display:flex;gap:8px;margin-top:8px;}
+  .confirm-row button{flex:1;padding:10px;border-radius:2px;font-size:12px;font-weight:700;}
+  .btn-lockin{background:var(--gold);border:none;color:#171208;}
+  .btn-lockin:disabled{background:var(--gold-dim);opacity:.4;}
+  .btn-cancel{background:transparent;border:1px solid var(--line);color:var(--paper-dim);}
+
+  .log-panel{width:260px;border-left:1px solid var(--line);background:#0f1015;display:flex;flex-direction:column;flex-shrink:0;}
+  .log-panel h4{margin:0;padding:10px 12px;font-size:11px;color:var(--paper-dim);border-bottom:1px solid var(--line);letter-spacing:.1em;}
+  .log-scroll{flex:1;overflow-y:auto;padding:8px 12px;font-size:11px;line-height:1.7;color:#c4bfa9;}
+  .log-scroll .lg-turn{color:var(--gold);margin-top:6px;font-weight:700;}
+
+  .result-overlay{position:absolute;inset:0;background:rgba(4,4,6,.92);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:60;}
+  .result-overlay.active{display:flex;}
+  .result-overlay h1{font-size:56px;margin:0;letter-spacing:.1em;}
+  .result-overlay.win h1{color:var(--gold);}
+  .result-overlay.lose h1{color:var(--p2);}
+  .result-overlay p{color:var(--paper-dim);margin:10px 0 30px;}
+
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:#2a2d38;border-radius:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  @media (max-width:900px){
+    .log-panel{display:none;}
+    .side-panel{width:230px;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <h1 class="kamui-title">K@MUI</h1>
+    <div class="kamui-sub">六方陣・合戦絵巻</div>
+    <div class="home-btns">
+      <div class="banner-btn" onclick="startModeSelect('cpu')">
+        <div class="bt-title">計算機戦</div>
+        <div class="bt-desc">CPUの大将と一騎討ち。<br>一人でルールを試せます。</div>
+      </div>
+      <div class="banner-btn" onclick="openOnlineModal()">
+        <div class="bt-title">対戦（合言葉）</div>
+        <div class="bt-desc">合言葉を決めて、離れた相手と<br>非同期でオンライン対戦。</div>
+      </div>
+    </div>
+    <div class="home-foot">全5部隊・六角形マップ・昼夜視界・向き（正面/側面/背面）判定 実装</div>
+  </div>
+
+  <!-- ONLINE MODAL -->
+  <div class="modal-back" id="online-modal">
+    <div class="modal">
+      <h3>合言葉オンライン対戦</h3>
+      <div class="modal-note">同じ合言葉を入力した2人がこのブラウザ内ストレージを介して手番を共有します。互いに数秒おきに自動更新されるので、離れた端末から交代で操作してください。</div>
+      <input type="text" id="passphrase-input" placeholder="合言葉を入力（例：あかつき7）" maxlength="24">
+      <div class="modal-note" id="online-status" style="min-height:16px;"></div>
+      <div class="modal-row">
+        <button class="btn-mini" onclick="closeOnlineModal()">戻る</button>
+        <button class="btn-mini gold" onclick="joinOnlineRoom()">入室する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="screen" id="screen-setup">
+    <div class="setup-head">
+      <h2 class="mincho">編成</h2>
+      <span id="setup-mode-label"></span>
+      <span style="margin-left:auto;color:#6b6656;">六柱の神々の代理戦争 — 恩恵を受けし民を選べ</span>
+    </div>
+    <div class="setup-body">
+      <div class="race-col" id="race-col"></div>
+      <div class="squads-col" id="squads-col"></div>
+    </div>
+    <div class="setup-foot">
+      <button class="btn-ghost" onclick="backToHome()">戻る</button>
+      <button class="btn-main" id="btn-to-battle" onclick="confirmSetup()">出陣</button>
+    </div>
+  </div>
+
+  <!-- BATTLE -->
+  <div class="screen" id="screen-battle">
+    <div class="bt-top">
+      <div class="clock"><span class="dot day" id="daynight-dot"></span><b id="clock-text">6:00</b></div>
+      <div class="divider"></div>
+      <div id="day-label">1日目</div>
+      <div class="divider"></div>
+      <div id="weather-label" style="font-size:12px;color:var(--paper-dim);"></div>
+      <div class="divider"></div>
+      <div class="turnphase" id="phase-label">部隊行動を計画してください</div>
+      <div class="spacer"></div>
+      <button class="audio-btn" id="audio-toggle" onclick="toggleAudio()">🔇 BGM</button>
+      <div id="net-status" style="font-size:11px;color:var(--paper-dim);"></div>
+      <button class="exitbtn" onclick="backToHome()">やめる</button>
+    </div>
+    <div class="bt-body">
+      <div id="hit-flash"></div>
+      <div class="map-wrap" id="map-wrap"></div>
+      <div class="side-panel">
+        <div class="side-scroll" id="unit-list"></div>
+        <div class="action-panel" id="action-panel"></div>
+      </div>
+      <div class="log-panel">
+        <h4>戦況記録</h4>
+        <div class="log-scroll" id="log-scroll"></div>
+      </div>
+    </div>
+    <div class="result-overlay" id="result-overlay">
+      <h1 id="result-title"></h1>
+      <p id="result-desc"></p>
+      <button class="btn-main" onclick="backToHome()">home へ戻る</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ======================================================================
+   K@MUI  --  data
+   ====================================================================== */
+const COLS=19, ROWS=11, HEXSIZE=27;
+
+const RACES=[
+  {id:'ares',name:'アレスの民',color:'#c0453a',desc:'軍神アレスの恩恵。攻撃ステータスが強化され、正面での殴り合いに最適。部隊長も攻撃寄り。',
+    atk:1.50,def:1.00,mob:1.00,
+    commanders:['ガレオス','ザルド','シレノス','ドレイク','バルド','ヴァルザ','ラグズ']},
+  {id:'hermes',name:'ヘルメスの民',color:'#e08a3c',desc:'俊足の神ヘルメスの恩恵。基本移動可能マスが3に増え、行動力も強化される。部隊長も移動系能力が多い。',
+    atk:0.95,def:0.95,mob:1.25,baseMoveSteps:3,
+    commanders:['アートル','キリエ','シルフィ','ゼフィ','フェル','ミスト','ルドラ']},
+  {id:'hephaestus',name:'ヘパイストスの民',color:'#ffcc4d',desc:'鍛冶の神ヘパイストスの恩恵。武具の補正・特殊効果が強化され、部隊長は部隊長装備を2つ持てる。',
+    atk:1.00,def:1.00,mob:0.95,equipAmp:1.35,dualEquip:true,
+    commanders:['アイアン','ヴァルカ','バルカン','ゴードン','ティタ','ドロシー','リネット']},
+  {id:'dionysus',name:'デュオニソスの民',color:'#a37fd1',desc:'酒神デュオニソスの恩恵。士気が低下しにくく、毎ターン士気が自然に3上昇し、短い休憩でも士気が大きく回復する。部隊長は防御寄り。',
+    atk:0.95,def:1.10,mob:1.00,moraleLossMult:0.6,restMult:1.6,passiveMoraleRegen:3,
+    commanders:['エヴィ','キオス','シレノス','ナーラ','バッカ','バックス','ミューラ']},
+  {id:'aphrodite',name:'アフロディテの民',color:'#d97fa0',desc:'美と癒しの女神アフロディテの恩恵。兵の自然回復に優れ、長期戦に強い。部隊長の戦術は敵ではなく味方を癒す。周囲5マスの敵部隊は休憩できなくなる。',
+    atk:0.95,def:1.00,mob:1.00,passiveRegen:0.02,healSkill:true,auraNoRestRadius:5,
+    commanders:['アドニス','エルミ','カリア','フローラ','ミラ','ローザ','ヴィーラ']},
+  {id:'athena',name:'アテナの民',color:'#3d7fa6',desc:'知略の女神アテナの恩恵。戦術（スキル）の効果量が大きく強化される。部隊長も戦術に特化し、戦術のクールダウンも短い。',
+    atk:1.00,def:1.00,mob:1.00,skillAmp:1.35,skillMoraleCostMult:0.6,skillCooldown:2,
+    commanders:['アルテ','クレト','ソフィア','テルモ','ネストル','パラス','メニス']},
+];
+
+/* range: [min,max] マス */
+const WEAPONS=[
+  {id:'ken', name:'剣', range:[1,1], atk:1.20, def:1.20, note:'攻撃・防御ともに1.2倍。射程1。バランス型。'},
+  {id:'ono', name:'斧', range:[1,1], atk:1.40, def:1.00, ignoreDef:0.10, moraleCost:6, guardBreak:true,
+    note:'攻撃1.4倍・敵防御1割無視。攻撃時に自軍の士気を6消費。盾部隊のガードを崩し、命中した盾部隊は2ターン自衛不可に。'},
+  {id:'yumi', name:'弓', range:[1,4], atk:0.80, def:0.80, variableTerrain:true,
+    note:'攻撃・防御0.8倍。射程1〜4。地形・天候・風向きでダメージ倍率が変動する。'},
+  {id:'yari', name:'槍', range:[1,2], atk:1.10, def:1.00, guardCounter:true,
+    note:'攻撃1.1倍。射程1〜2。隣接する味方の盾部隊が攻撃を受けると、代わりにその相手へ反撃（自身は無傷、向き判定は盾部隊のものを参照）。'},
+  {id:'tate', name:'盾', range:[1,1], atk:0.60, def:1.50, canGuard:true,
+    note:'攻撃0.6倍・防御1.5倍。攻撃の代わりに「自衛」を選べ、自衛中は被ダメージ半減。'},
+];
+
+const EQUIPS=[
+  {id:'gusoku',name:'具足',atk:1.00,def:1.20,mob:0.85,restMult:1.00,note:'防御+20% / 行動力-15%'},
+  {id:'saihai',name:'采配',atk:0.95,def:1.00,mob:1.00,restMult:1.5,note:'休憩の士気回復+50% / 攻撃-5%'},
+  {id:'umajirushi',name:'馬印',atk:1.00,def:0.90,mob:1.20,restMult:1.00,note:'行動力+20% / 防御-10%'},
+  {id:'taiko',name:'陣太鼓',atk:1.00,def:1.00,mob:0.95,restMult:1.00,moraleGuard:true,note:'脱走ダメージ・士気低下を軽減 / 行動力-5%'},
+];
+
+/* 部隊長固有の戦術。type: 'attack'(敵を選んで攻撃) / 'selfbuff'(自部隊に即時発動) / 'teambuff'(味方全体に即時発動)
+   通常の戦術（等倍1.8倍）より強くなるよう各calcMultを調整してある。現在アレスの民のみ実装。 */
+const COMMANDER_SKILLS={
+  'ガレオス':{name:'血戦',type:'attack',
+    desc:'自部隊の残りHPが少ないほど威力が上がる一撃。',
+    calcMult:(sq)=>1.5+(1-Math.max(0,sq.hp)/sq.maxHp)*1.7},
+  'ザルド':{name:'破槌',type:'attack',
+    desc:'敵の防御を2割無視する強打。使用すると次のターンは移動できなくなる。',
+    calcMult:()=>2.0, extraIgnoreDef:0.20,
+    selfEffect:(sq)=>{ sq.moveLockedTurns=2; }},
+  'シレノス':{name:'処刑',type:'attack',
+    desc:'相手の減少HPが多いほど追加ダメージが乗る一撃。',
+    calcMult:(sq,target)=>1.6+(1-Math.max(0,target.hp)/target.maxHp)*1.9},
+  'ドレイク':{name:'爪撃',type:'attack',
+    desc:'この戦闘中に「攻撃」を選んだ回数が多いほど威力が上がる。',
+    calcMult:(sq)=>1.6+Math.min(2.4, (sq.attackCount||0)*0.2)},
+  'バルド':{name:'鉄壁',type:'selfbuff',
+    desc:'次のターンの行動終了まで、自部隊が受けるダメージを4割軽減する。',
+    apply:(sq)=>{ sq.damageReductionTurns=2; }},
+  'ヴァルザ':{name:'血斧',type:'attack',
+    desc:'自らのHPの一部を代償に、通常の戦術を上回る一撃を放つ。',
+    calcMult:()=>2.5, selfCostRatio:0.05},
+  'ラグズ':{name:'闘魂',type:'teambuff',
+    desc:'味方部隊全ての士気を10回復する。',
+    apply:(caster)=>{ STATE.squads.filter(a=>a.alive&&a.owner===caster.owner).forEach(a=>{ a.morale=Math.min(100,a.morale+10); }); }},
+  'アートル':{name:'俊足',type:'selfbuff',
+    desc:'3ターンの間、自部隊の移動可能マスと行動力が上がる。',
+    apply:(sq)=>{ sq.mobBuffMult=1.4; sq.mobBuffTurns=4; }},
+  'キリエ':{name:'迅風',type:'moveattack',
+    desc:'移動先を指定すると、その周囲の近くの敵部隊2つまでに攻撃する。'},
+  'シルフィ':{name:'飛翔',type:'selfbuff',
+    desc:'発動したターン、弓・槍・戦術による攻撃以外のダメージを受けなくなる。',
+    apply:(sq)=>{ sq.flightTurns=2; }},
+  'ゼフィ':{name:'影縫',type:'attack',
+    desc:'命中した敵部隊を2ターンの間動けなくする。',
+    calcMult:()=>1.9,
+    targetEffect:(target)=>{ target.moveLockedTurns=Math.max(target.moveLockedTurns||0,3); },
+    targetEffectMsg:'2ターン動けなくなった。'},
+  'フェル':{name:'疾走',type:'selfbuff',
+    desc:'一時的に自部隊の行動力が2倍になる。',
+    apply:(sq)=>{ sq.mobBuffMult=2.0; sq.mobBuffTurns=2; }},
+  'ミスト':{name:'雲隠',type:'selfbuff',
+    desc:'3ターンの間、敵から自部隊を視認されなくなる。',
+    apply:(sq)=>{ sq.stealthTurns=4; }},
+  'ルドラ':{name:'春嵐',type:'selfbuff',
+    desc:'周囲で最も近い敵部隊の背後へ瞬時に回り込む。',
+    apply:(sq)=>{ applyRudraReposition(sq); }},
+  'アイアン':{name:'双錬',type:'teambuff',
+    desc:'次のターンの間、味方全部隊が持っている部隊武器のデメリットを無視する。',
+    apply:(caster)=>{ STATE.squads.filter(a=>a.alive&&a.owner===caster.owner).forEach(a=>{ a.ignoreWeaponDemeritTurns=2; }); }},
+  'ヴァルカ':{name:'叉撃',type:'attack',
+    desc:'2回分の判定が発生する攻撃。',
+    calcMult:()=>1.5, doubleHit:true},
+  'バルカン':{name:'換装',type:'selfbuff',
+    desc:'これ以降、自部隊の部隊武器によるメリットとデメリットが入れ替わる（永続）。',
+    apply:(sq)=>{ sq.weaponSwapped=!sq.weaponSwapped; }},
+  'ゴードン':{name:'重装',type:'selfbuff',
+    desc:'2ターンの間、自部隊の部隊武器による防御倍率が上がる。',
+    apply:(sq)=>{ sq.weaponDefBuffTurns=3; }},
+  'ティタ':{name:'精錬',type:'teambuff',
+    desc:'以降、味方全部隊の攻撃値に+5（重複して蓄積する）。',
+    apply:(caster)=>{ STATE.teamAtkBonus[caster.owner]=(STATE.teamAtkBonus[caster.owner]||0)+5; }},
+  'ドロシー':{name:'修理',type:'teambuff',
+    desc:'味方全部隊のHPを5%ほど回復する。',
+    apply:(caster)=>{ STATE.squads.filter(a=>a.alive&&a.owner===caster.owner).forEach(a=>{ a.hp=Math.min(a.maxHp, a.hp+Math.round(a.maxHp*0.05)); }); }},
+  'リネット':{name:'惑器',type:'attack',
+    desc:'命中した敵部隊を2ターンの間、攻撃できなくする。',
+    calcMult:()=>1.6,
+    targetEffect:(target)=>{ target.attackLockedTurns=Math.max(target.attackLockedTurns||0,3); },
+    targetEffectMsg:'2ターン攻撃できなくなった。'},
+  'エヴィ':{name:'酔狂',type:'selfbuff',
+    desc:'4ターンの間、自部隊の士気が低下しなくなる。',
+    apply:(sq)=>{ sq.moraleImmuneTurns=5; }},
+  'キオス':{name:'宴会',type:'teambuff',
+    desc:'自種族の全部隊の士気を5下げてHPを15%回復する。周囲2マスに自部隊を含め3部隊いないと発動できない。',
+    extraCondition:(sq)=> STATE.squads.filter(a=>a.alive&&a.owner===sq.owner&&hexDistance(sq.col,sq.row,a.col,a.row)<=2).length>=3,
+    apply:(caster)=>{
+      STATE.squads.filter(a=>a.alive&&a.owner===caster.owner).forEach(a=>{
+        a.morale=Math.max(0,a.morale-5);
+        a.hp=Math.min(a.maxHp,a.hp+Math.round(a.maxHp*0.15));
+      });
+    }},
+  'シレノス':{name:'泥酔',type:'selfbuff',
+    desc:'3ターンの間、攻撃を受けた際にその敵部隊を2ターン足止めする。',
+    apply:(sq)=>{ sq.drunkenTurns=4; }},
+  'ナーラ':{name:'結束',type:'allymove',
+    desc:'指定した味方部隊の周囲1マスのランダムな空きマスへ移動する。',
+    },
+  'バッカ':{name:'鬨声',type:'teambuff',
+    desc:'自種族の全部隊の士気を10回復する。',
+    apply:(caster)=>{ STATE.squads.filter(a=>a.alive&&a.owner===caster.owner).forEach(a=>{ a.morale=Math.min(100,a.morale+10); }); }},
+  'バックス':{name:'鉄甲',type:'selfbuff',
+    desc:'1ターンの間、戦術による攻撃を受け付けなくなる。',
+    apply:(sq)=>{ sq.skillImmuneTurns=2; }},
+  'ミューラ':{name:'堅忍',type:'selfbuff',
+    desc:'これまでにダメージを受けた回数に応じて防御力が上がる。何度でも重ねがけできる。',
+    apply:(sq)=>{ sq.enduranceDefBonus=(sq.enduranceDefBonus||0)+(sq.timesHit||0)*3; }},
+};
+
+const DIRS_EVEN=[[+1,0],[0,-1],[-1,-1],[-1,0],[-1,+1],[0,+1]]; // E,NE,NW,W,SW,SE
+const DIRS_ODD =[[+1,0],[+1,-1],[0,-1],[-1,0],[0,+1],[+1,+1]];
+const DIR_VECS=[[Math.sqrt(3),0],[Math.sqrt(3)/2,-1.5],[-Math.sqrt(3)/2,-1.5],[-Math.sqrt(3),0],[-Math.sqrt(3)/2,1.5],[Math.sqrt(3)/2,1.5]];
+const DIR_NAMES=['東','北東','北西','西','南西','南東'];
+
+/* ======================================================================
+   Audio & screen FX (procedurally synthesized -- no external assets)
+   Celtic reel melody (E Dorian) fused with taiko / shime-daiko / bodhrán-style percussion
+   ====================================================================== */
+let audioCtx=null, audioOn=false, TURN_HIT_FLAG=false;
+let masterGain=null, schedulerTimer=null;
+let droneOsc1=null, droneOsc2=null, droneGain=null;
+const TEMPO=150;                 // BPM -- driving reel tempo
+const STEP_DUR=60/TEMPO/4;       // seconds per 16th note
+const LOOP_LEN=64;               // 4 bars of 16 steps
+let nextStepTime=0, stepIndex=0;
+
+/* E Dorian scale */
+const N={ E2:82.41,Fs2:92.50,G2:98.00,A2:110.00,B2:123.47,Cs3:138.59,D3:146.83,
+          E3:164.81,Fs3:185.00,G3:196.00,A3:220.00,B3:246.94,Cs4:277.18,D4:293.66,
+          E4:329.63,Fs4:369.99,G4:392.00,A4:440.00,B4:493.88,Cs5:554.37,D5:587.33,E5:659.25 };
+
+/* 4-bar Celtic reel run, climbs to a high-octave climax in bar3 then resolves into a taiko flourish */
+const LEAD_PATTERN=[
+  N.E4,N.Fs4,N.G4,N.A4, N.B4,N.A4,N.G4,N.Fs4, N.E4,N.G4,N.B4,N.A4, N.G4,N.Fs4,N.E4,N.D4,
+  N.E4,N.Fs4,N.G4,N.B4, N.A4,N.G4,N.Fs4,N.E4, N.D4,N.E4,N.Fs4,N.G4, N.A4,N.B4,N.Cs5,N.D5,
+  N.E5,N.D5,N.Cs5,N.B4, N.A4,N.B4,N.Cs5,N.D5, N.E5,N.D5,N.B4,N.A4, N.G4,N.Fs4,N.G4,N.A4,
+  N.B4,N.A4,N.G4,N.Fs4, N.E4,N.Fs4,N.G4,N.A4, N.B4,N.A4,N.G4,N.E4, null,null,null,null,
+];
+/* shamisen/bodhrán-pluck bass -- i - bVII - iv - i (Em-D-Am-Em, dorian) */
+const BASS_PATTERN=(()=>{
+  const arr=new Array(LOOP_LEN).fill(null);
+  const bars=[[N.E3,N.E3,N.B2,N.E3],[N.D3,N.D3,N.A2,N.D3],[N.A2,N.A2,N.E3,N.A2],[N.E3,N.E3,N.B2,N.E3]];
+  bars.forEach((bar,bi)=>{ bar.forEach((note,ni)=>{ arr[bi*16+ni*4]=note; }); });
+  return arr;
+})();
+const KICK_STEPS=new Set([0,8,16,24,32,40,48,56]);          // 大太鼓（odaiko）-- strong downbeats
+const SHIME_STEPS=new Set([4,12,20,28,36,44,52]);           // 締太鼓（shime）-- driving off-beats
+const BODHRAN_STEPS=new Set([2,6,10,14,18,22,26,30,34,38,42,46,50,54]); // フレームドラム的な裏打ち
+const FLOURISH_STEPS=[60,61,62,63];                          // ループ末尾の煽り連打
+
+function toggleAudio(){
+  if(!audioCtx){
+    try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
+    masterGain=audioCtx.createGain(); masterGain.gain.value=0.9; masterGain.connect(audioCtx.destination);
+  }
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  audioOn=!audioOn;
+  const btn=document.getElementById('audio-toggle');
+  if(btn) btn.textContent = audioOn?'🔊 BGM':'🔇 BGM';
+  if(audioOn) startBGM(); else stopBGM();
+}
+function startBGM(){
+  stopBGM();
+  stepIndex=0;
+  nextStepTime=audioCtx.currentTime+0.05;
+  schedulerTimer=setInterval(schedulerTick,25);
+  startDrone();
+}
+function stopBGM(){
+  if(schedulerTimer) clearInterval(schedulerTimer); schedulerTimer=null;
+  stopDrone();
+}
+function startDrone(){
+  stopDrone();
+  const t=audioCtx.currentTime+0.02;
+  droneGain=audioCtx.createGain(); droneGain.gain.setValueAtTime(0,t); droneGain.gain.linearRampToValueAtTime(0.05,t+1.2);
+  const lp=audioCtx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=700;
+  droneOsc1=audioCtx.createOscillator(); droneOsc1.type='sawtooth'; droneOsc1.frequency.value=N.E2;
+  droneOsc2=audioCtx.createOscillator(); droneOsc2.type='sawtooth'; droneOsc2.frequency.value=N.B2; // 完全5度のバグパイプ的ドローン
+  droneOsc1.connect(lp); droneOsc2.connect(lp); lp.connect(droneGain); droneGain.connect(masterGain);
+  droneOsc1.start(t); droneOsc2.start(t);
+}
+function stopDrone(){
+  if(droneGain && audioCtx){ try{ droneGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+0.3); }catch(e){} }
+  const o1=droneOsc1,o2=droneOsc2;
+  if(o1) try{ o1.stop(audioCtx.currentTime+0.35); }catch(e){}
+  if(o2) try{ o2.stop(audioCtx.currentTime+0.35); }catch(e){}
+  droneOsc1=null; droneOsc2=null; droneGain=null;
+}
+function schedulerTick(){
+  if(!audioOn||!audioCtx) return;
+  while(nextStepTime < audioCtx.currentTime+0.12){
+    scheduleStep(stepIndex, nextStepTime);
+    nextStepTime += STEP_DUR;
+    stepIndex = (stepIndex+1)%LOOP_LEN;
+  }
+}
+function scheduleStep(i,t){
+  if(KICK_STEPS.has(i)) playTaikoLow(t, i%16===0?1:0.8);
+  if(SHIME_STEPS.has(i)) playShime(t,0.5);
+  if(BODHRAN_STEPS.has(i)) playBodhran(t, i%4===2?0.16:0.09);
+  if(FLOURISH_STEPS.includes(i)){
+    const idx=FLOURISH_STEPS.indexOf(i);
+    playShime(t,0.55+idx*0.15); playTaikoLow(t,0.5+idx*0.15);
+  }
+  const b=BASS_PATTERN[i]; if(b) playBassNote(t,b);
+  const l=LEAD_PATTERN[i];
+  if(l){
+    const grace = (i%8===0 && LEAD_PATTERN[(i-1+LOOP_LEN)%LOOP_LEN]);
+    if(grace) playLeadGrace(t-0.045, l*0.891);
+    playLeadNote(t,l, i%4===0);
+  }
+}
+function playTaikoLow(t,vol){
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='sine'; o.frequency.setValueAtTime(115,t); o.frequency.exponentialRampToValueAtTime(38,t+0.18);
+  g.gain.setValueAtTime(0.55*vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.34);
+  o.connect(g); g.connect(masterGain); o.start(t); o.stop(t+0.36);
+}
+function playShime(t,vol){
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(420,t); o.frequency.exponentialRampToValueAtTime(260,t+0.06);
+  g.gain.setValueAtTime(0.3*vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.09);
+  o.connect(g); g.connect(masterGain); o.start(t); o.stop(t+0.1);
+}
+function playBodhran(t,vol){
+  const len=Math.floor(audioCtx.sampleRate*0.07);
+  const buf=audioCtx.createBuffer(1,len,audioCtx.sampleRate); const d=buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*(1-i/len);
+  const noise=audioCtx.createBufferSource(); noise.buffer=buf;
+  const bp=audioCtx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=550; bp.Q.value=1.2;
+  const g=audioCtx.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.07);
+  noise.connect(bp); bp.connect(g); g.connect(masterGain); noise.start(t);
+}
+function playBassNote(t,freq){
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(freq,t); o.frequency.exponentialRampToValueAtTime(freq*0.97,t+0.2);
+  const lp=audioCtx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=750;
+  g.gain.setValueAtTime(0.001,t); g.gain.linearRampToValueAtTime(0.24,t+0.008); g.gain.exponentialRampToValueAtTime(0.001,t+STEP_DUR*3.2);
+  o.connect(lp); lp.connect(g); g.connect(masterGain); o.start(t); o.stop(t+STEP_DUR*3.3);
+}
+function playLeadNote(t,freq,accent){
+  const o=audioCtx.createOscillator(), o2=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='square'; o.frequency.value=freq;
+  o2.type='triangle'; o2.frequency.value=freq*2; // オクターブ上のトライアングルでフィドル/笛らしい倍音を足す
+  const lp=audioCtx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3600;
+  const peak=accent?0.17:0.115;
+  g.gain.setValueAtTime(0.001,t); g.gain.linearRampToValueAtTime(peak,t+0.007); g.gain.exponentialRampToValueAtTime(0.001,t+STEP_DUR*1.85);
+  const g2=audioCtx.createGain(); g2.gain.value=0.35;
+  o.connect(lp); lp.connect(g); g.connect(masterGain);
+  o2.connect(g2); g2.connect(g);
+  o.start(t); o.stop(t+STEP_DUR*1.9); o2.start(t); o2.stop(t+STEP_DUR*1.9);
+}
+function playLeadGrace(t,freq){
+  if(t<0) return;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='square'; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.001,t); g.gain.linearRampToValueAtTime(0.07,t+0.005); g.gain.exponentialRampToValueAtTime(0.001,t+0.045);
+  o.connect(g); g.connect(masterGain); o.start(t); o.stop(t+0.05);
+}
+function playHitSfx(){
+  if(!audioOn||!audioCtx) return;
+  const t=audioCtx.currentTime;
+  const dur=0.14, len=Math.floor(audioCtx.sampleRate*dur);
+  const buf=audioCtx.createBuffer(1,len,audioCtx.sampleRate);
+  const data=buf.getChannelData(0);
+  for(let i=0;i<len;i++){ data[i]=(Math.random()*2-1)*(1-i/len); }
+  const noise=audioCtx.createBufferSource(); noise.buffer=buf;
+  const filt=audioCtx.createBiquadFilter(); filt.type='bandpass'; filt.frequency.value=1100+Math.random()*600;
+  const g=audioCtx.createGain(); g.gain.setValueAtTime(0.32,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  noise.connect(filt); filt.connect(g); g.connect(masterGain||audioCtx.destination); noise.start(t);
+}
+function playFanfare(win){
+  if(!audioCtx) return;
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  const t=audioCtx.currentTime;
+  const notes = win? [440,554,659,880] : [349,330,294,220];
+  notes.forEach((f,i)=>{
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type='triangle'; o.frequency.value=f;
+    const st=t+i*0.2;
+    g.gain.setValueAtTime(0.0001,st); g.gain.linearRampToValueAtTime(0.28,st+0.03); g.gain.exponentialRampToValueAtTime(0.0001,st+0.55);
+    o.connect(g); g.connect(masterGain||audioCtx.destination); o.start(st); o.stop(st+0.6);
+  });
+}
+function screenImpact(){
+  const wrap=document.getElementById('map-wrap');
+  if(!wrap) return;
+  wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
+  const flash=document.getElementById('hit-flash');
+  if(flash){ flash.classList.remove('flashnow'); void flash.offsetWidth; flash.classList.add('flashnow'); }
+}
+
+
+/* ======================================================================
+   Hex helpers
+   ====================================================================== */
+function oddrToCube(col,row){
+  const x = col - (row - (row & 1))/2;
+  const z = row;
+  const y = -x-z;
+  return {x,y,z};
+}
+function hexDistance(c1,r1,c2,r2){
+  const a=oddrToCube(c1,r1), b=oddrToCube(c2,r2);
+  return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y),Math.abs(a.z-b.z));
+}
+function neighbor(col,row,dir){
+  const dirs=(row%2===0)?DIRS_EVEN:DIRS_ODD;
+  const [dc,dr]=dirs[dir];
+  return [col+dc,row+dr];
+}
+function neighborsOf(col,row){
+  const out=[];
+  for(let d=0; d<6; d++){
+    const [c,r]=neighbor(col,row,d);
+    if(c>=0&&c<COLS&&r>=0&&r<ROWS) out.push({col:c,row:r,dir:d});
+  }
+  return out;
+}
+function hexToPixel(col,row){
+  const x = HEXSIZE*Math.sqrt(3)*(col + 0.5*(row&1)) + HEXSIZE;
+  const y = HEXSIZE*1.5*row + HEXSIZE;
+  return {x,y};
+}
+function hexPolygonPoints(cx,cy,size){
+  let pts=[];
+  for(let i=0;i<6;i++){
+    const ang = Math.PI/180*(60*i-90);
+    pts.push((cx+size*Math.cos(ang)).toFixed(1)+','+(cy+size*Math.sin(ang)).toFixed(1));
+  }
+  return pts.join(' ');
+}
+function directionFromDelta(dx,dy){
+  let best=-Infinity,bi=0;
+  DIR_VECS.forEach((v,i)=>{const dot=v[0]*dx+v[1]*dy; if(dot>best){best=dot;bi=i;}});
+  return bi;
+}
+function directionBetweenHexes(c1,r1,c2,r2){
+  const p1=hexToPixel(c1,r1), p2=hexToPixel(c2,r2);
+  return directionFromDelta(p2.x-p1.x,p2.y-p1.y);
+}
+function angleDiff(d1,d2){
+  const a=Math.abs(d1-d2)%6;
+  return Math.min(a,6-a); // 0..3
+}
+/* BFS movement range (cannot end on occupied hex; can pass through empty hexes only) */
+function reachableHexes(startCol,startRow,steps,occupiedSet){
+  const visited={}; const key=(c,r)=>c+'_'+r;
+  visited[key(startCol,startRow)]=0;
+  let frontier=[{col:startCol,row:startRow,d:0}];
+  const result=[];
+  while(frontier.length){
+    const next=[];
+    for(const f of frontier){
+      if(f.d>=steps) continue;
+      for(const n of neighborsOf(f.col,f.row)){
+        const k=key(n.col,n.row);
+        if(visited[k]!==undefined) continue;
+        if(occupiedSet.has(k)) continue; // can't pass through or land on occupied
+        visited[k]=f.d+1;
+        result.push({col:n.col,row:n.row,dist:f.d+1});
+        next.push({col:n.col,row:n.row,d:f.d+1});
+      }
+    }
+    frontier=next;
+  }
+  return result;
+}
+
+/* ======================================================================
+   Game state
+   ====================================================================== */
+let STATE=null;
+let SETUP={mode:null, race:null, squads:null, roomCode:null, isHost:true};
+
+function freshSetupSquads(raceId){
+  const race=RACES.find(r=>r.id===raceId)||RACES[0];
+  return Array.from({length:5},(_,i)=>({
+    commander: race.commanders[i],
+    weapon: WEAPONS[0].id,
+    equip: EQUIPS[0].id,
+    equip2: null,
+  }));
+}
+
+/* ---------------- HOME / MODAL ---------------- */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function backToHome(){
+  stopOnlinePolling();
+  STATE=null;
+  showScreen('screen-home');
+}
+function startModeSelect(mode){
+  SETUP.mode=mode; SETUP.roomCode=null;
+  SETUP.race=RACES[0].id; SETUP.squads=freshSetupSquads(SETUP.race);
+  renderSetupScreen();
+  document.getElementById('setup-mode-label').textContent='計算機戦（CPU：ランダム陣営）';
+  showScreen('screen-setup');
+}
+function openOnlineModal(){ document.getElementById('online-modal').classList.add('active'); }
+function closeOnlineModal(){ document.getElementById('online-modal').classList.remove('active'); }
+function joinOnlineRoom(){
+  const pass=document.getElementById('passphrase-input').value.trim();
+  if(!pass){ document.getElementById('online-status').textContent='合言葉を入力してください。'; return; }
+  SETUP.mode='online'; SETUP.roomCode='kamui:'+pass;
+  SETUP.race=RACES[0].id; SETUP.squads=freshSetupSquads(SETUP.race);
+  closeOnlineModal();
+  document.getElementById('setup-mode-label').textContent='オンライン対戦：合言葉「'+pass+'」';
+  checkOnlineRoomAndSetup();
+}
+async function checkOnlineRoomAndSetup(){
+  try{
+    const existing = await window.storage.get(SETUP.roomCode, true);
+    SETUP.isHost = !existing; // first to arrive with unstarted game is host (player 1)
+  }catch(e){ SETUP.isHost=true; }
+  renderSetupScreen();
+  showScreen('screen-setup');
+}
+
+/* ---------------- SETUP SCREEN ---------------- */
+function renderSetupScreen(){
+  const rc=document.getElementById('race-col'); rc.innerHTML='';
+  RACES.forEach(r=>{
+    const div=document.createElement('div');
+    div.className='race-item'+(SETUP.race===r.id?' sel':'');
+    div.innerHTML=`<div class="rname" style="color:${r.color}">${r.name}</div><div class="rdesc">${r.desc}</div>`;
+    div.onclick=()=>{
+      SETUP.race=r.id;
+      SETUP.squads.forEach((sq,i)=>{ sq.commander=r.commanders[i]; if(!r.dualEquip) sq.equip2=null; });
+      renderSetupScreen();
+    };
+    rc.appendChild(div);
+  });
+  const sc=document.getElementById('squads-col'); sc.innerHTML='';
+  const race=RACES.find(r=>r.id===SETUP.race);
+  const amp=race.equipAmp||1;
+  SETUP.squads.forEach((sq,i)=>{
+    const w=WEAPONS.find(w=>w.id===sq.weapon);
+    const eq=EQUIPS.find(e=>e.id===sq.equip);
+    const eq2=(race.dualEquip && sq.equip2)? EQUIPS.find(e=>e.id===sq.equip2) : null;
+    const wfx=weaponEffects(w,amp);
+    const eqx=mergeEquips(eq,eq2,amp);
+    const atk=Math.round(1000*race.atk*wfx.atk*eqx.atk)/10;
+    const def=Math.round(1000*race.def*wfx.def*eqx.def)/10;
+    const mob=Math.round(1000*race.mob*eqx.mob)/10;
+    const card=document.createElement('div');
+    card.className='squad-card'+(i===0?' taisho':'');
+    card.innerHTML=`
+      <div class="sc-top">
+        <div class="sc-badge${i===0?' taisho':''}">${i===0?'将':i+1}</div>
+        <div class="sc-name">${i===0?'大将部隊':'第'+(i+1)+'部隊'}</div>
+        ${i===0?'<div class="sc-tag">討たれると敗北</div>':''}
+      </div>
+      <div class="sc-grid">
+        <div class="sc-field"><label>部隊長</label>
+          <select data-i="${i}" data-k="commander">
+            ${race.commanders.filter(n=> n===sq.commander || !SETUP.squads.some((other,oi)=>oi!==i && other.commander===n))
+              .map(n=>`<option value="${n}" ${sq.commander===n?'selected':''}>${race.name}・${n}</option>`).join('')}
+          </select>
+        </div>
+        <div class="sc-field"><label>武器</label>
+          <select data-i="${i}" data-k="weapon">
+            ${WEAPONS.map(w=>`<option value="${w.id}" ${sq.weapon===w.id?'selected':''}>${w.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="sc-field"><label>部隊長装備${race.dualEquip?'①':''}</label>
+          <select data-i="${i}" data-k="equip">
+            ${EQUIPS.map(e=>`<option value="${e.id}" ${sq.equip===e.id?'selected':''}>${e.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      ${race.dualEquip?`
+      <div class="sc-grid" style="margin-top:8px;grid-template-columns:1fr;">
+        <div class="sc-field"><label>部隊長装備②（鍛冶の恩恵）</label>
+          <select data-i="${i}" data-k="equip2">
+            <option value="">（持たない）</option>
+            ${EQUIPS.map(e=>`<option value="${e.id}" ${sq.equip2===e.id?'selected':''}>${e.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>`:''}
+      <div class="sc-stats">
+        <span>攻撃 <b>${atk}</b></span><span>防御 <b>${def}</b></span><span>行動 <b>${mob}</b></span><span>兵数 <b>10000</b>（固定）</span>
+      </div>
+      ${COMMANDER_SKILLS[sq.commander]?`
+      <div class="sc-stats" style="margin-top:4px;">
+        <span style="color:var(--gold);">固有戦術「${COMMANDER_SKILLS[sq.commander].name}」：${COMMANDER_SKILLS[sq.commander].desc}</span>
+      </div>`:''}
+      <div class="sc-stats" style="margin-top:4px;">
+        <span style="color:var(--paper-dim)">${w.note}</span>
+      </div>
+      <div class="sc-stats">
+        <span style="color:var(--paper-dim)">${eq.note}${eq2?'　＋　'+eq2.note:''}</span>
+      </div>
+    `;
+    sc.appendChild(card);
+  });
+  sc.querySelectorAll('select').forEach(sel=>{
+    sel.onchange=(e)=>{
+      const i=+e.target.dataset.i, k=e.target.dataset.k;
+      SETUP.squads[i][k]= (k==='equip2' && e.target.value==='') ? null : e.target.value;
+      renderSetupScreen();
+    };
+  });
+}
+
+function ampStat(v,amp){ return amp? (1+(v-1)*amp) : v; }
+
+function weaponEffects(w1,amp){
+  return {
+    atk:ampStat(w1.atk,amp), def:ampStat(w1.def,amp),
+    rangeMin:w1.range[0], rangeMax:w1.range[1],
+    ignoreDef:w1.ignoreDef||0, moraleCost:w1.moraleCost||0, guardBreak:!!w1.guardBreak,
+    variableTerrain:!!w1.variableTerrain, guardCounter:!!w1.guardCounter, canGuard:!!w1.canGuard,
+    label:w1.name,
+  };
+}
+/* merge one or two 部隊長装備 (equipment) into combined stat multipliers -- ヘパイストスの民は2つ持てる */
+function mergeEquips(e1,e2,amp){
+  if(!e2) return {
+    atk:ampStat(e1.atk,amp), def:ampStat(e1.def,amp), mob:ampStat(e1.mob,amp),
+    restMult:e1.restMult, moraleGuard:!!e1.moraleGuard, label:e1.name, note:e1.note,
+  };
+  return {
+    atk: ampStat(e1.atk,amp)*ampStat(e2.atk,amp),
+    def: ampStat(e1.def,amp)*ampStat(e2.def,amp),
+    mob: ampStat(e1.mob,amp)*ampStat(e2.mob,amp),
+    restMult: e1.restMult*e2.restMult,
+    moraleGuard: !!e1.moraleGuard||!!e2.moraleGuard,
+    label: e1.name+'・'+e2.name, note: e1.note+'　＋　'+e2.note,
+  };
+}
+
+function buildSquad(raceId,cfg,index,owner){
+  const race=RACES.find(r=>r.id===raceId);
+  const w=WEAPONS.find(w=>w.id===cfg.weapon);
+  const eq=EQUIPS.find(e=>e.id===cfg.equip);
+  const eq2 = (race.dualEquip && cfg.equip2) ? EQUIPS.find(e=>e.id===cfg.equip2) : null;
+  const amp = race.equipAmp||1;
+  const wfx = weaponEffects(w,amp);
+  const eqx = mergeEquips(eq,eq2,amp);
+  const maxHp = 10000; // 初期兵数は種族・装備によらず固定
+  return{
+    owner, index, isTaisho:index===0,
+    name:(index===0?'大将':'第'+(index+1)+'部隊'),
+    commander:cfg.commander, raceId, raceName:race.name, color:race.color, race,
+    weaponId:w.id, weaponName:w.name,
+    weaponLabel: w.name, weaponNote: w.note,
+    range:wfx.rangeMax, rangeMin:wfx.rangeMin, rangeMax:wfx.rangeMax,
+    ignoreDef:wfx.ignoreDef, atkMoraleCost:wfx.moraleCost, guardBreak:wfx.guardBreak,
+    variableTerrain:wfx.variableTerrain, guardCounter:wfx.guardCounter, canGuard:wfx.canGuard,
+    equipId:eq.id, equipName:eqx.label, equip2Id:eq2?eq2.id:null, restMult:eqx.restMult*(race.restMult||1), moraleGuard:eqx.moraleGuard,
+    weaponAtk:wfx.atk, weaponDef:wfx.def, equipAtk:eqx.atk, equipDef:eqx.def,
+    baseAtk: race.atk*wfx.atk*eqx.atk,
+    baseDef: race.def*wfx.def*eqx.def,
+    baseMob: race.mob*eqx.mob,
+    maxHp, hp:maxHp, morale:60,
+    col:0,row:0, facing:0, guardTurns:0, guardBrokenTurns:0, skillCooldown:0,
+    attackCount:0, moveLockedTurns:0, damageReductionTurns:0,
+    mobBuffMult:1, mobBuffTurns:0, flightTurns:0, stealthTurns:0,
+    weaponSwapped:false, ignoreWeaponDemeritTurns:0, weaponDefBuffTurns:0, attackLockedTurns:0,
+    moraleImmuneTurns:0, drunkenTurns:0, skillImmuneTurns:0, enduranceDefBonus:0, timesHit:0,
+    alive:true, plan:null, actedThisTurn:false, history:[],
+  };
+}
+
+function confirmSetup(){
+  if(SETUP.mode==='cpu'){
+    const enemyRace=RACES[Math.floor(Math.random()*RACES.length)].id;
+    const enemySquads=freshSetupSquads(enemyRace).map(sq=>({
+      ...sq,
+      weapon: WEAPONS[Math.floor(Math.random()*WEAPONS.length)].id,
+      equip: EQUIPS[Math.floor(Math.random()*EQUIPS.length)].id,
+      equip2: EQUIPS[Math.floor(Math.random()*EQUIPS.length)].id,
+    }));
+    initBattle({
+      p1:{raceId:SETUP.race,cfgs:SETUP.squads,isCPU:false},
+      p2:{raceId:enemyRace,cfgs:enemySquads,isCPU:true},
+      mode:'cpu'
+    });
+    showScreen('screen-battle');
+  } else {
+    submitOnlineSetup();
+  }
+}
+
+/* ======================================================================
+   Battle init
+   ====================================================================== */
+function genMap(){
+  const map=[];
+  for(let r=0;r<ROWS;r++){ map.push(Array.from({length:COLS},()=> 'plain')); }
+  // scatter hills
+  const hillClusters=4;
+  for(let i=0;i<hillClusters;i++){
+    const cc=4+Math.floor(Math.random()*(COLS-8)), cr=1+Math.floor(Math.random()*(ROWS-2));
+    map[cr][cc]='hill';
+    neighborsOf(cc,cr).forEach(n=>{ if(Math.random()<0.35) map[n.row][n.col]='hill'; });
+  }
+  // scatter forests
+  const forestClusters=6;
+  for(let i=0;i<forestClusters;i++){
+    const cc=3+Math.floor(Math.random()*(COLS-6)), cr=Math.floor(Math.random()*ROWS);
+    if(map[cr][cc]==='plain') map[cr][cc]='forest';
+    neighborsOf(cc,cr).forEach(n=>{ if(map[n.row][n.col]==='plain' && Math.random()<0.45) map[n.row][n.col]='forest'; });
+  }
+  return map;
+}
+
+function initBattle({p1,p2,mode}){
+  const map=genMap();
+  const rowsForSquads=[2,4,5,6,8];
+  const p1squads=p1.cfgs.map((cfg,i)=>{
+    const sq=buildSquad(p1.raceId,cfg,i,1);
+    sq.col=1; sq.row=rowsForSquads[i]; sq.facing=0; return sq;
+  });
+  const p2squads=p2.cfgs.map((cfg,i)=>{
+    const sq=buildSquad(p2.raceId,cfg,i,2);
+    sq.col=COLS-2; sq.row=rowsForSquads[i]; sq.facing=3; return sq;
+  });
+  STATE={
+    mode, map, hour:6, day:1,
+    turnNum:1,
+    squads:[...p1squads,...p2squads],
+    log:[],
+    wind:Math.floor(Math.random()*6), weather: Math.random()<0.25?'雨':'晴れ',
+    teamAtkBonus:{1:0,2:0},
+    p1isCPU: !!p1.isCPU, p2isCPU: !!p2.isCPU,
+    selectedSquadId:null,
+    pendingActionType:null,
+    online: mode==='online' ? {room:SETUP.roomCode, isHost:SETUP.isHost, myOwner: SETUP.isHost?1:2} : null,
+    over:false,
+  };
+  addLog('turn','【出陣】'+ (mode==='cpu'?'計算機戦、開戦。':'オンライン対戦、開戦。'));
+  document.getElementById('result-overlay').classList.remove('active');
+  renderAll();
+  if(STATE.mode==='online') startOnlinePolling();
+}
+
+function mySquads(){ return STATE.squads.filter(s=> s.owner=== (STATE.mode==='online'? STATE.online.myOwner : 1)); }
+function enemyOwnerOf(owner){ return owner===1?2:1; }
+function enemySquads(owner){ return STATE.squads.filter(s=>s.owner!==owner); }
+function auraBlocksRest(sq){
+  return STATE.squads.some(t=>t.alive && t.owner!==sq.owner && t.race.auraNoRestRadius &&
+    hexDistance(sq.col,sq.row,t.col,t.row) <= t.race.auraNoRestRadius);
+}
+function isDay(){ return STATE.hour>=6 && STATE.hour<20; }
+function visionRadius(sq){
+  let r = isDay()?5:1;
+  if(terrainAt(sq.col,sq.row)==='hill') r+=1;
+  return r;
+}
+function terrainAt(c,r){ return STATE.map[r][c]; }
+
+/* effective (decayed) stats -- normalized 0..1 ratios, floor 0.3 so combat never fully stalls */
+function effStats(sq){
+  const hpRatio=Math.max(0,sq.hp)/sq.maxHp;
+  const moraleRatio=Math.max(0,sq.morale)/100;
+  const hpFactor = 0.3+0.7*hpRatio;
+  const moraleFactor = 0.3+0.7*moraleRatio;
+  const mobBuff = sq.mobBuffTurns>0 ? (sq.mobBuffMult||1) : 1;
+
+  let wAtk = sq.weaponSwapped ? sq.weaponDef : sq.weaponAtk;
+  let wDef = sq.weaponSwapped ? sq.weaponAtk : sq.weaponDef;
+  if(sq.ignoreWeaponDemeritTurns>0){ wAtk=Math.max(1,wAtk); wDef=Math.max(1,wDef); } // 双錬：武器のデメリットを無視
+  if(sq.weaponDefBuffTurns>0) wDef*=1.3; // 重装：武器の防御倍率上昇
+
+  const teamAtkBonus = (STATE.teamAtkBonus && STATE.teamAtkBonus[sq.owner]) || 0; // 精錬：全隊+5ずつ加算・累積
+
+  return{
+    atk: sq.race.atk*wAtk*sq.equipAtk*100*hpFactor*moraleFactor + teamAtkBonus,
+    def: sq.race.def*wDef*sq.equipDef*100*hpFactor*moraleFactor + (sq.enduranceDefBonus||0), // ミューラ「堅忍」
+    mob: sq.baseMob*mobBuff*100*hpFactor*moraleFactor,
+    hpFactor, moraleFactor
+  };
+}
+function moveSteps(sq){
+  if(sq.moveLockedTurns>0) return 0;
+  const e=effStats(sq);
+  const base = sq.race.baseMoveSteps||2; // 基本移動可能マスは2（ヘルメスの民は3）、行動力の実効値で増減
+  let steps=Math.round(base*(e.mob/100));
+  steps=Math.max(1,steps);
+  return Math.min(7,steps);
+}
+function canUseSkill(sq){
+  if(sq.morale<70 || sq.skillCooldown>0) return false;
+  const csk=COMMANDER_SKILLS[sq.commander];
+  if(csk && csk.extraCondition && !csk.extraCondition(sq)) return false;
+  return true;
+}
+function applyMoraleLoss(sq,amount){
+  if(amount<=0) return;
+  if(sq.moraleImmuneTurns>0) return; // エヴィの戦術「酔狂」
+  const mult = sq.race.moraleLossMult||1;
+  sq.morale=Math.max(0,sq.morale-amount*mult);
+}
+
+/* ======================================================================
+   Vision / fog
+   ====================================================================== */
+function visibleHexesFor(owner){
+  const set=new Set();
+  STATE.squads.filter(s=>s.owner===owner&&s.alive).forEach(sq=>{
+    const rad=visionRadius(sq);
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      if(hexDistance(sq.col,sq.row,c,r)<=rad) set.add(c+'_'+r);
+    }
+  });
+  return set;
+}
+function squadVisibleTo(sq,owner){
+  if(sq.owner===owner) return true;
+  if(sq.stealthTurns>0) return false; // ミストの戦術「雲隠」
+  const vis=visibleHexesFor(owner);
+  if(!vis.has(sq.col+'_'+sq.row)) return false;
+  if(terrainAt(sq.col,sq.row)==='forest'){
+    const extra = sq.stealth?1:1; // stealth race still needs adjacency; base rule = adjacency
+    const near = STATE.squads.some(o=>o.owner===owner&&o.alive&&hexDistance(o.col,o.row,sq.col,sq.row)<=extra);
+    return near;
+  }
+  return true;
+}
+
+/* ======================================================================
+   Rendering
+   ====================================================================== */
+function addLog(kind,msg){
+  STATE.log.push({kind,msg});
+  const el=document.getElementById('log-scroll');
+  const line=document.createElement('div');
+  if(kind==='turn'){ line.className='lg-turn'; }
+  line.textContent=msg;
+  el.appendChild(line);
+  el.scrollTop=el.scrollHeight;
+}
+function pushHistory(sq,text){
+  if(!sq.history) sq.history=[];
+  sq.history.push({day:STATE.day,hour:STATE.hour,text});
+  if(sq.history.length>24) sq.history.shift();
+}
+
+function renderAll(){
+  if(!STATE) return;
+  renderClock();
+  renderMap();
+  renderUnitList();
+  renderActionPanel();
+}
+function renderClock(){
+  const h=String(STATE.hour).padStart(2,'0');
+  document.getElementById('clock-text').textContent=h+':00';
+  document.getElementById('day-label').textContent=STATE.day+'日目';
+  document.getElementById('daynight-dot').className='dot '+(isDay()?'day':'night');
+  document.getElementById('phase-label').textContent = STATE.over? '決着' : '部隊行動を計画してください';
+  document.getElementById('weather-label').textContent = STATE.weather+' / 風：'+DIR_NAMES[STATE.wind]+'（弓に影響）';
+  document.getElementById('net-status').textContent = STATE.mode==='online' ? ('あなた：'+(STATE.online.myOwner===1?'player1':'player2')+' / 相手の入力を待っています') : '';
+}
+
+const viewer = ()=> STATE.mode==='online' ? STATE.online.myOwner : 1;
+
+function renderMap(){
+  const wrap=document.getElementById('map-wrap');
+  const W = HEXSIZE*Math.sqrt(3)*(COLS+0.5)+HEXSIZE*2;
+  const H = HEXSIZE*1.5*(ROWS)+HEXSIZE*2;
+  const me=viewer();
+  const vis=visibleHexesFor(me);
+  let reach=null, targets=null;
+  const selSquad = STATE.selectedSquadId!=null ? STATE.squads[STATE.selectedSquadId] : null;
+  if(selSquad){
+    const occ=new Set(STATE.squads.filter(s=>s.alive).map(s=>s.col+'_'+s.row));
+    occ.delete(selSquad.col+'_'+selSquad.row);
+    reach = reachableHexes(selSquad.col,selSquad.row,moveSteps(selSquad),occ);
+  }
+  const selCsk = selSquad ? COMMANDER_SKILLS[selSquad.commander] : null;
+  if(selSquad && STATE.pendingActionType==='skill' && (selCsk && (selCsk.type==='selfbuff'||selCsk.type==='teambuff'||selCsk.type==='moveattack'))){
+    targets = null; // 対象選択不要（即時発動）
+  } else if(selSquad && STATE.pendingActionType==='skill' && ((!selCsk && selSquad.race.healSkill) || (selCsk && selCsk.type==='allymove'))){
+    targets = STATE.squads.filter(t=>t.alive && t.owner===selSquad.owner && t!==selSquad);
+  } else if(selSquad && (STATE.pendingActionType==='attack'||STATE.pendingActionType==='skill')){
+    targets = enemySquads(selSquad.owner).filter(t=>t.alive && squadVisibleTo(t,selSquad.owner) &&
+      hexDistance(selSquad.col,selSquad.row,t.col,t.row) >= selSquad.rangeMin && hexDistance(selSquad.col,selSquad.row,t.col,t.row) <= selSquad.rangeMax);
+  }
+
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">`;
+  svg+=`<defs>
+    <radialGradient id="gPlain" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#414c31"/><stop offset="100%" stop-color="#2a331e"/></radialGradient>
+    <radialGradient id="gForest" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#25452a"/><stop offset="100%" stop-color="#132719"/></radialGradient>
+    <radialGradient id="gHill" cx="35%" cy="22%" r="85%"><stop offset="0%" stop-color="#69573a"/><stop offset="100%" stop-color="#382d1c"/></radialGradient>
+    <radialGradient id="gP1" cx="34%" cy="26%" r="80%"><stop offset="0%" stop-color="#a4c6ea"/><stop offset="55%" stop-color="#4c7fb8"/><stop offset="100%" stop-color="#274160"/></radialGradient>
+    <radialGradient id="gP2" cx="34%" cy="26%" r="80%"><stop offset="0%" stop-color="#e6a29c"/><stop offset="55%" stop-color="#a5333a"/><stop offset="100%" stop-color="#511f22"/></radialGradient>
+  </defs>`;
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const {x,y}=hexToPixel(c,r);
+      const t=terrainAt(c,r);
+      const gradMap={plain:'url(#gPlain)',forest:'url(#gForest)',hill:'url(#gHill)'};
+      const isReach = reach && reach.some(h=>h.col===c&&h.row===r);
+      const isOwnHex = selSquad && c===selSquad.col && r===selSquad.row;
+      svg+=`<polygon class="hex${isReach?' reachable':''}" points="${hexPolygonPoints(x,y,HEXSIZE-1)}" fill="${gradMap[t]}" ${isReach?`onclick="onHexClick(${c},${r})"`:(isOwnHex?`onclick="onOwnHexClick()"`:'')}/>`;
+      svg+=`<polygon class="hex-rim" points="${hexPolygonPoints(x,y,HEXSIZE-1.5)}"/>`;
+      if(isReach){ svg+=`<polygon class="reach-overlay" points="${hexPolygonPoints(x,y,HEXSIZE-3)}"/><polygon class="reach-ring" points="${hexPolygonPoints(x,y,HEXSIZE-3)}"/>`; }
+      if(isOwnHex){ svg+=`<polygon class="rest-ring" points="${hexPolygonPoints(x,y,HEXSIZE-5)}"/>`; }
+      if(t==='forest'){
+        svg+=`<g class="tree-icon" transform="translate(${x},${y})">
+          <polygon points="-7,4 -2,-7 3,4" fill="#1c3320" stroke="#0a1510" stroke-width=".6"/>
+          <polygon points="1,6 6,-5 11,6" fill="#234227" stroke="#0a1510" stroke-width=".6"/>
+        </g>`;
+      }
+      if(t==='hill'){
+        svg+=`<g class="hill-icon" transform="translate(${x},${y})">
+          <polygon points="-13,7 0,-9 13,7" fill="#4a3d28" stroke="#241d10" stroke-width=".8"/>
+          <polygon points="-4,-2 0,-9 4,-2" fill="#8a7a54"/>
+        </g>`;
+      }
+    }
+  }
+  // fog
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(!vis.has(c+'_'+r)){
+      const {x,y}=hexToPixel(c,r);
+      svg+=`<polygon class="fog" points="${hexPolygonPoints(x,y,HEXSIZE-1)}"/>`;
+    }
+  }
+  // units
+  STATE.squads.forEach((sq,idx)=>{
+    if(!sq.alive) return;
+    if(!squadVisibleTo(sq,me)) return;
+    const {x,y}=hexToPixel(sq.col,sq.row);
+    const isRangedTargetable = targets && targets.includes(sq);
+    const isQuickAtk = !isRangedTargetable && selSquad && sq.owner!==selSquad.owner && sq.alive &&
+      hexDistance(selSquad.col,selSquad.row,sq.col,sq.row)===1 && STATE.pendingActionType!=='skill';
+    const active = isRangedTargetable||isQuickAtk;
+    const clickFn = isRangedTargetable? `onTargetClick(${idx})` : isQuickAtk? `onAdjacentEnemyClick(${idx})` : (sq.owner===me? `onUnitClick(${idx})` : '');
+    const grad = sq.owner===1? 'url(#gP1)':'url(#gP2)';
+    const R = HEXSIZE*0.62;
+    svg+=`<g class="unit-icon${active?' targetable':''}${isQuickAtk?' quickatk':''}" ${clickFn?`onclick="${clickFn}"`:''}>`;
+    if(active){ svg+=`<circle class="${isQuickAtk?'quickatk-ring':'target-glow'}" cx="${x}" cy="${y}" r="${R+5}"/>`; }
+    if(STATE.selectedSquadId===idx){
+      svg+=`<circle class="select-ring-outer" cx="${x}" cy="${y}" r="${R+7}"/><circle class="select-ring-inner" cx="${x}" cy="${y}" r="${R+3.5}"/>`;
+    }
+    svg+=`<circle class="unit-badge${sq.isTaisho?' taisho':''}" cx="${x}" cy="${y}" r="${R}" fill="${grad}"/>`;
+    if(sq.isTaisho){
+      svg+=`<polygon points="${(-6+x).toFixed(1)},${(y-R-2).toFixed(1)} ${(-3+x).toFixed(1)},${(y-R-8).toFixed(1)} ${x.toFixed(1)},${(y-R-3).toFixed(1)} ${(3+x).toFixed(1)},${(y-R-8).toFixed(1)} ${(6+x).toFixed(1)},${(y-R-2).toFixed(1)}" fill="var(--gold)" stroke="#3a2c05" stroke-width=".5"/>`;
+    }
+    // facing flag (small triangle pennant pointing outward in facing direction)
+    const fp = DIR_VECS[sq.facing];
+    const flen = Math.hypot(fp[0],fp[1]);
+    const ux=fp[0]/flen, uy=fp[1]/flen;
+    const px=x+ux*R, py=y+uy*R;
+    const perpx=-uy, perpy=ux;
+    const tipx=x+ux*(R+7), tipy=y+uy*(R+7);
+    svg+=`<polygon class="facing-flag" points="${(px+perpx*3.2).toFixed(1)},${(py+perpy*3.2).toFixed(1)} ${(px-perpx*3.2).toFixed(1)},${(py-perpy*3.2).toFixed(1)} ${tipx.toFixed(1)},${tipy.toFixed(1)}"/>`;
+    svg+=`<text class="unit-label" x="${x}" y="${y+4}" text-anchor="middle">${sq.isTaisho?'将':sq.index+1}</text>`;
+    // hp bar
+    const bw=HEXSIZE*1.35, hpPct=Math.max(0,sq.hp/sq.maxHp);
+    const barY=y+R+5;
+    svg+=`<rect class="hp-bg" x="${x-bw/2}" y="${barY}" width="${bw}" height="5" rx="2.5"/>`;
+    svg+=`<rect class="hp-fill" x="${x-bw/2}" y="${barY}" width="${bw*hpPct}" height="5" rx="2.5" fill="${hpPct<0.3?'var(--danger)':hpPct<0.6?'#c9a24b':'var(--ok)'}"/>`;
+    svg+=`</g>`;
+  });
+  svg+='</svg>';
+  wrap.innerHTML=svg;
+}
+
+function statusBadges(sq){
+  const badges=[];
+  if(sq.skillCooldown>0) badges.push(`戦術クールダウン中（あと${sq.skillCooldown}ターン）`);
+  else if(!canUseSkill(sq)) badges.push('戦術封印(士気69以下)');
+  if(sq.morale<20) badges.push('脱走発生中！');
+  if(sq.moveLockedTurns>0) badges.push(`移動不可（あと${sq.moveLockedTurns}ターン）`);
+  if(sq.damageReductionTurns>0) badges.push(`鉄壁効果中（あと${sq.damageReductionTurns}ターン）`);
+  if(sq.mobBuffTurns>0) badges.push(`俊足効果中（あと${sq.mobBuffTurns}ターン）`);
+  if(sq.flightTurns>0) badges.push(`飛翔中（あと${sq.flightTurns}ターン）`);
+  if(sq.stealthTurns>0) badges.push(`雲隠中・敵から視認不可（あと${sq.stealthTurns}ターン）`);
+  if(sq.ignoreWeaponDemeritTurns>0) badges.push(`双錬効果中・武器デメリット無視（あと${sq.ignoreWeaponDemeritTurns}ターン）`);
+  if(sq.weaponDefBuffTurns>0) badges.push(`重装効果中・武器防御倍率上昇（あと${sq.weaponDefBuffTurns}ターン）`);
+  if(sq.attackLockedTurns>0) badges.push(`攻撃不可（あと${sq.attackLockedTurns}ターン）`);
+  if(sq.weaponSwapped) badges.push('換装済み（武器のメリット/デメリット反転中）');
+  if(sq.moraleImmuneTurns>0) badges.push(`酔狂効果中・士気低下無効（あと${sq.moraleImmuneTurns}ターン）`);
+  if(sq.drunkenTurns>0) badges.push(`泥酔効果中・被弾で敵を足止め（あと${sq.drunkenTurns}ターン）`);
+  if(sq.skillImmuneTurns>0) badges.push(`鉄甲効果中・戦術無効（あと${sq.skillImmuneTurns}ターン）`);
+  if(sq.enduranceDefBonus>0) badges.push(`堅忍効果（防御+${Math.round(sq.enduranceDefBonus)}・蓄積中）`);
+  return badges;
+}
+
+function renderUnitList(){
+  const el=document.getElementById('unit-list'); el.innerHTML='';
+  const me=viewer();
+  const order=[...STATE.squads].sort((a,b)=> (a.owner===me?0:1)-(b.owner===me?0:1));
+  order.forEach((sq)=>{
+    const idx=STATE.squads.indexOf(sq);
+    if(!squadVisibleTo(sq,me) && sq.owner!==me) return;
+    const div=document.createElement('div');
+    div.className='unit-row '+(sq.owner===me?'mine':'enemy')+(!sq.alive?' dead':'')+(sq.actedThisTurn?' acted':'')+(STATE.selectedSquadId===idx?' selected':'');
+    const e=effStats(sq);
+    div.innerHTML=`
+      <div class="ur-top"><span>${sq.raceName}・${sq.commander}${sq.isTaisho?'（大将）':''}</span><span style="color:${sq.owner===1?'var(--p1)':'var(--p2)'}">${sq.owner===me?'味方':'敵'}</span></div>
+      <div class="ur-bars">
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,100*sq.hp/sq.maxHp)}%;background:${sq.hp/sq.maxHp<0.3?'var(--danger)':'var(--ok)'}"></div></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,sq.morale)}%;background:${sq.morale<20?'var(--danger)':sq.morale<70?'#8a733a':'#c9a24b'}"></div></div>
+      </div>
+      <div class="ur-stats"><span>兵${Math.round(sq.hp)}/${sq.maxHp}</span><span>士気${Math.round(sq.morale)}</span><span>${sq.weaponName}/${sq.equipName}</span></div>
+      ${!sq.alive?'<div class="ur-status">壊滅</div>':statusBadges(sq).map(b=>`<div class="ur-status">${b}</div>`).join('')}
+    `;
+    if(sq.alive && sq.owner===me && !STATE.over){
+      div.onclick=()=>{ selectSquad(idx); };
+    }
+    el.appendChild(div);
+  });
+}
+
+function selectSquad(idx){
+  STATE.selectedSquadId=idx;
+  STATE.pendingActionType=null;
+  renderAll();
+}
+
+function renderActionPanel(){
+  const el=document.getElementById('action-panel');
+  const sq = STATE.selectedSquadId!=null ? STATE.squads[STATE.selectedSquadId] : null;
+  if(!sq || sq.owner!==viewer() || !sq.alive || STATE.over){
+    el.innerHTML = `<div class="act-hint">左の一覧から自軍の部隊を選ぶと移動可能マスが光ります。行動を指示し、全部隊が決まったら「全軍出撃」を押します。</div>`;
+    return;
+  }
+  const csk = COMMANDER_SKILLS[sq.commander];
+  const skillType = csk? csk.type : (sq.race.healSkill? 'heal':'attack');
+  const skillLabel = csk? csk.name : '戦術';
+  const skillOk=canUseSkill(sq);
+  const rangeTxt = sq.rangeMin===sq.rangeMax? (''+sq.rangeMin) : (sq.rangeMin+'〜'+sq.rangeMax);
+  const attackLocked = sq.attackLockedTurns>0;
+  const hasAtkTarget = !attackLocked && enemySquads(sq.owner).some(t=>t.alive && squadVisibleTo(t,sq.owner) &&
+    hexDistance(sq.col,sq.row,t.col,t.row)>=sq.rangeMin && hexDistance(sq.col,sq.row,t.col,t.row)<=sq.rangeMax);
+  const hasHealTarget = STATE.squads.some(t=>t.alive && t.owner===sq.owner && t!==sq);
+  let skillHasTarget;
+  if(skillType==='selfbuff'||skillType==='teambuff') skillHasTarget=true;
+  else if(skillType==='moveattack') skillHasTarget = moveSteps(sq)>0;
+  else if(skillType==='allymove') skillHasTarget = hasHealTarget;
+  else if(skillType==='heal') skillHasTarget=hasHealTarget;
+  else skillHasTarget=hasAtkTarget;
+  const canGuardNow = sq.canGuard && sq.guardBrokenTurns<=0;
+  const restBlocked = auraBlocksRest(sq);
+  const moveLocked = sq.moveLockedTurns>0;
+  el.innerHTML=`
+    <h4>${sq.raceName}・${sq.commander} の行動</h4>
+    <div class="act-btns">
+      <button class="act-btn ${STATE.pendingActionType==='move'?'chosen':''}" ${moveLocked?'disabled':''} onclick="chooseAction('move')">移動${moveLocked?`(不可${sq.moveLockedTurns})`:''}</button>
+      <button class="act-btn ${STATE.pendingActionType==='attack'?'chosen':''}" ${hasAtkTarget?'':'disabled'} onclick="chooseAction('attack')">攻撃${attackLocked?'(不可)':''}</button>
+      <button class="act-btn ${STATE.pendingActionType==='skill'?'chosen':''}" ${(skillOk&&skillHasTarget)?'':'disabled'} onclick="chooseAction('skill')">${skillLabel}${skillOk?'':(sq.skillCooldown>0?`(CD${sq.skillCooldown})`:'(封印)')}</button>
+      ${canGuardNow?`<button class="act-btn ${STATE.pendingActionType==='guard'?'chosen':''}" onclick="chooseAction('guard')">自衛</button>`:''}
+      <button class="act-btn ${STATE.pendingActionType==='rest'?'chosen':''}" ${restBlocked?'disabled':''} onclick="chooseAction('rest')">休憩${restBlocked?'(妨害)':''}</button>
+    </div>
+    <div class="act-hint" id="act-hint">${actionHint(sq,rangeTxt,restBlocked,csk,skillType,skillLabel)}</div>
+    ${sq.guardBrokenTurns>0?`<div class="ur-status" style="margin-top:4px;">ガード崩し状態（あと${sq.guardBrokenTurns}ターン自衛不可）</div>`:''}
+    ${restBlocked?`<div class="ur-status" style="margin-top:4px;">敵アフロディテの民の加護圏内で休憩不可</div>`:''}
+    ${attackLocked?`<div class="ur-status" style="margin-top:4px;">「惑器」の影響で攻撃不可（あと${sq.attackLockedTurns}ターン）</div>`:''}
+    ${moveLocked?`<div class="ur-status" style="margin-top:4px;">移動不可状態（あと${sq.moveLockedTurns}ターン）</div>`:''}
+    ${sq.damageReductionTurns>0?`<div class="ur-status" style="margin-top:4px;color:var(--gold);">鉄壁効果中（被ダメ4割軽減、あと${sq.damageReductionTurns}ターン）</div>`:''}
+    <div class="confirm-row">
+      <button class="btn-cancel" onclick="cancelPlan()">取消</button>
+      <button class="btn-lockin" id="btn-set-plan" ${sq.plan?'':'disabled'} onclick="lockInSelected()">この部隊を確定</button>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--paper-dim);">
+      計画済み ${STATE.squads.filter(s=>s.owner===viewer()&&s.alive).filter(s=>s.plan).length} / ${STATE.squads.filter(s=>s.owner===viewer()&&s.alive).length}
+    </div>
+    <div class="confirm-row">
+      <button class="btn-lockin" style="flex:1" id="btn-all-set" onclick="allSquadsSet()" ${allMineHavePlans()?'':'disabled'}>全軍出撃</button>
+    </div>
+    <div style="margin-top:12px;">
+      <div style="font-size:11px;color:var(--gold);letter-spacing:.05em;margin-bottom:4px;">この部隊の行動記録</div>
+      <div style="max-height:120px;overflow-y:auto;font-size:11px;color:#c4bfa9;line-height:1.6;background:var(--panel2);border:1px solid var(--line);border-radius:2px;padding:6px 8px;">
+        ${(sq.history&&sq.history.length)? sq.history.slice().reverse().map(h=>`<div>${h.day}日${String(h.hour).padStart(2,'0')}時：${h.text}</div>`).join('') : '<div style="color:#6b6656;">まだ記録なし</div>'}
+      </div>
+    </div>
+  `;
+}
+function actionHint(sq,rangeTxt,restBlocked,csk,skillType,skillLabel){
+  if(STATE.pendingActionType==='move'||STATE.pendingActionType==null) return '光っているマスへ移動できます（行動力に応じて基本'+(sq.race.baseMoveSteps||2)+'マス）。移動した方向が新しい正面になります。何もしなければ他の行動を選んでください。';
+  if(STATE.pendingActionType==='attack') return '射程内の敵をクリックして攻撃対象を選択（射程'+rangeTxt+'）。攻撃すると部隊の正面が対象の方向に変わる。正面から攻撃するほど与ダメージ増、背後を突かれた敵は被ダメージ増。';
+  if(STATE.pendingActionType==='skill'){
+    const cdNote = '使用後は3ターン（アテナの民は2ターン）使用不可。';
+    if(csk){
+      if(skillType==='attack') return `戦術「${skillLabel}」：${csk.desc} 士気70以上で使用可、${cdNote} 射程内の敵をクリック。`;
+      if(skillType==='selfbuff') return `戦術「${skillLabel}」：${csk.desc} 士気70以上で使用可、${cdNote} ボタンを押すだけで即発動（対象選択不要）。`;
+      if(skillType==='teambuff') return `戦術「${skillLabel}」：${csk.desc} 士気70以上で使用可、${cdNote} ボタンを押すだけで即発動（対象選択不要）。`;
+      if(skillType==='moveattack') return `戦術「${skillLabel}」：${csk.desc} 士気70以上で使用可、${cdNote} 光っているマスから移動先を選んでください。`;
+      if(skillType==='allymove') return `戦術「${skillLabel}」：${csk.desc} 士気70以上で使用可、${cdNote} 味方部隊をクリックしてください。`;
+    }
+    if(skillType==='heal') return `戦術「治癒」：敵ではなく味方部隊をクリックして兵を回復。士気70以上で使用可、${cdNote}`;
+    return `戦術（強力な一撃）。士気70以上で使用可、${cdNote} 射程内の敵をクリック。`;
+  }
+  if(STATE.pendingActionType==='guard') return '自衛：この部隊は今ターン攻撃せず防御に徹する。受けるダメージが半減する。';
+  if(STATE.pendingActionType==='rest') return restBlocked? '敵アフロディテの民の部隊が周囲5マス以内にいるため、休憩による回復ができない。':'休憩（6時間睡眠を想定した簡易処理）：士気回復（装備・種族補正あり）、兵数も少し回復。士気はこれでしか回復しない。';
+  return '行動の種類を選んでください。';
+}
+function chooseAction(type){
+  const sq=STATE.squads[STATE.selectedSquadId];
+  if(type==='rest' && auraBlocksRest(sq)) return;
+  if(type==='move' && sq.moveLockedTurns>0) return;
+  STATE.pendingActionType=type;
+  if(type==='rest'){ sq.plan={type:'rest'}; }
+  else if(type==='guard'){ sq.plan={type:'guard'}; }
+  else if(type==='skill'){
+    const csk=COMMANDER_SKILLS[sq.commander];
+    if(csk && (csk.type==='selfbuff'||csk.type==='teambuff')){ sq.plan={type:'skill'}; }
+    else { sq.plan=null; }
+  }
+  else { sq.plan=null; }
+  renderAll();
+}
+function cancelPlan(){
+  const sq=STATE.squads[STATE.selectedSquadId];
+  sq.plan=null; STATE.pendingActionType=null;
+  renderAll();
+}
+function onHexClick(c,r){
+  const sq=STATE.squads[STATE.selectedSquadId];
+  if(!sq) return;
+  const csk=COMMANDER_SKILLS[sq.commander];
+  if(STATE.pendingActionType==='skill' && csk && csk.type==='moveattack'){
+    sq.plan={type:'skill', col:c, row:r};
+    renderAll();
+    return;
+  }
+  STATE.pendingActionType='move';
+  sq.plan={type:'move',col:c,row:r};
+  renderAll();
+}
+function onOwnHexClick(){
+  const sq=STATE.squads[STATE.selectedSquadId];
+  if(!sq || auraBlocksRest(sq)) return;
+  sq.plan={type:'rest'};
+  STATE.pendingActionType='rest';
+  renderAll();
+}
+function onAdjacentEnemyClick(targetIdx){
+  const sq=STATE.squads[STATE.selectedSquadId];
+  if(!sq) return;
+  const target=STATE.squads[targetIdx];
+  if(!target || !target.alive) return;
+  sq.plan={type:'attack',targetIdx};
+  STATE.pendingActionType='attack';
+  renderAll();
+}
+function onTargetClick(targetIdx){
+  const sq=STATE.squads[STATE.selectedSquadId];
+  if(!sq) return;
+  if(STATE.pendingActionType==='attack'){ sq.plan={type:'attack',targetIdx}; renderAll(); }
+  else if(STATE.pendingActionType==='skill'){ sq.plan={type:'skill',targetIdx}; renderAll(); }
+}
+function onUnitClick(idx){
+  const sq=STATE.squads[idx];
+  if(!sq.alive || sq.owner!==viewer() || STATE.over) return;
+  if(STATE.selectedSquadId===idx){
+    // クリックし直し＝自マスをクリックしたのと同じ扱いで休憩入力
+    if(auraBlocksRest(sq)) return;
+    sq.plan={type:'rest'};
+    STATE.pendingActionType='rest';
+    renderAll();
+  } else {
+    selectSquad(idx);
+  }
+}
+function lockInSelected(){
+  STATE.selectedSquadId=null; STATE.pendingActionType=null;
+  renderAll();
+}
+function allMineHavePlans(){
+  return STATE.squads.filter(s=>s.owner===viewer()&&s.alive).every(s=>s.plan);
+}
+
+/* ======================================================================
+   CPU AI
+   ====================================================================== */
+function decideCPU(owner){
+  const mine=STATE.squads.filter(s=>s.owner===owner&&s.alive);
+  mine.forEach(sq=>{
+    const foes=enemySquads(owner).filter(t=>t.alive);
+    const visibleFoes=foes.filter(t=>squadVisibleTo(t,owner));
+    const inRange=sq.attackLockedTurns>0 ? [] : visibleFoes.filter(t=>{
+      const d=hexDistance(sq.col,sq.row,t.col,t.row);
+      return d>=sq.rangeMin && d<=sq.rangeMax;
+    });
+    // Aphrodite: prioritize healing a badly wounded ally
+    if(sq.race.healSkill && canUseSkill(sq)){
+      const wounded=STATE.squads.filter(t=>t.alive&&t.owner===owner&&t!==sq&&t.hp/t.maxHp<0.6);
+      if(wounded.length && Math.random()<0.7){
+        wounded.sort((a,b)=>a.hp-b.hp);
+        sq.plan={type:'skill',targetIdx:STATE.squads.indexOf(wounded[0])};
+        return;
+      }
+    }
+    // 部隊長固有の自己/全体バフ戦術（対象選択不要）
+    const cskCPU=COMMANDER_SKILLS[sq.commander];
+    if(cskCPU && canUseSkill(sq)){
+      if(cskCPU.type==='selfbuff' && sq.hp/sq.maxHp<0.7 && Math.random()<0.6){ sq.plan={type:'skill'}; return; }
+      if(cskCPU.type==='teambuff' && Math.random()<0.45){ sq.plan={type:'skill'}; return; }
+    }
+    if(sq.morale<20 && Math.random()<0.5){
+      if(auraBlocksRest(sq)){ if(sq.canGuard && sq.guardBrokenTurns<=0){ sq.plan={type:'guard'}; return; } }
+      else { sq.plan={type:'rest'}; return; }
+    }
+    if(inRange.length){
+      inRange.sort((a,b)=>a.hp-b.hp);
+      const target=inRange[0];
+      if(sq.canGuard && sq.guardBrokenTurns<=0 && sq.hp/sq.maxHp<0.35 && Math.random()<0.5){ sq.plan={type:'guard'}; return; }
+      if(canUseSkill(sq) && !sq.race.healSkill && Math.random()<0.6) sq.plan={type:'skill',targetIdx:STATE.squads.indexOf(target)};
+      else sq.plan={type:'attack',targetIdx:STATE.squads.indexOf(target)};
+      return;
+    }
+    if(sq.morale<40 && !auraBlocksRest(sq)){ sq.plan={type:'rest'}; return; }
+    // move toward nearest visible foe, else toward map center / enemy start side
+    let goal;
+    if(visibleFoes.length){
+      visibleFoes.sort((a,b)=>hexDistance(sq.col,sq.row,a.col,a.row)-hexDistance(sq.col,sq.row,b.col,b.row));
+      goal=visibleFoes[0];
+    } else {
+      goal={col: owner===1?COLS-1:0, row: sq.row};
+    }
+    const occ=new Set(STATE.squads.filter(s=>s.alive).map(s=>s.col+'_'+s.row));
+    occ.delete(sq.col+'_'+sq.row);
+    const reach=reachableHexes(sq.col,sq.row,moveSteps(sq),occ);
+    const fallback = ()=> (sq.canGuard && sq.guardBrokenTurns<=0 && auraBlocksRest(sq)) ? {type:'guard'} : {type:'rest'};
+    if(reach.length){
+      reach.sort((a,b)=>hexDistance(a.col,a.row,goal.col,goal.row)-hexDistance(b.col,b.row,goal.col,goal.row));
+      const best=reach[0];
+      if(hexDistance(best.col,best.row,goal.col,goal.row) < hexDistance(sq.col,sq.row,goal.col,goal.row)){
+        sq.plan={type:'move',col:best.col,row:best.row};
+      } else { sq.plan=fallback(); }
+    } else { sq.plan=fallback(); }
+  });
+}
+
+/* ======================================================================
+   Turn resolution
+   ====================================================================== */
+function allSquadsSet(){
+  if(!allMineHavePlans()) return;
+  if(STATE.mode==='cpu'){
+    decideCPU(2);
+    resolveTurn();
+  } else {
+    submitOnlineTurn();
+  }
+}
+
+function resolveTurn(){
+  addLog('turn','── '+STATE.day+'日目 '+String(STATE.hour).padStart(2,'0')+':00 ── '+STATE.weather+'・風向き'+DIR_NAMES[STATE.wind]);
+  const alive=()=>STATE.squads.filter(s=>s.alive);
+  TURN_HIT_FLAG=false;
+
+  // 1) movement collisions
+  const movers=alive().filter(s=>s.plan && s.plan.type==='move');
+  const destMap={};
+  movers.forEach(s=>{
+    const k=s.plan.col+'_'+s.plan.row;
+    destMap[k]=destMap[k]||[];
+    destMap[k].push(s);
+  });
+  const stationary=new Set(alive().filter(s=>!(s.plan&&s.plan.type==='move')).map(s=>s.col+'_'+s.row));
+
+  Object.keys(destMap).forEach(k=>{
+    const group=destMap[k];
+    if(stationary.has(k)){
+      group.forEach(s=>{
+        const occupant=alive().find(o=>o.col+'_'+o.row===k);
+        addLog('move',`${sideLabel(s)}${s.raceName}${s.name}が${occupant.owner!==s.owner?'敵':'味方'}部隊に行く手を阻まれ停止。`);
+        pushHistory(s,`${occupant.raceName}${occupant.name}に行く手を阻まれ停止`);
+        if(occupant && occupant.owner!==s.owner){ clashDamage(s,occupant); }
+      });
+      return;
+    }
+    if(group.length===1){
+      const s=group[0];
+      const dir=directionBetweenHexes(s.col,s.row,s.plan.col,s.plan.row);
+      s.facing=dir;
+      s.col=s.plan.col; s.row=s.plan.row;
+      addLog('move',`${sideLabel(s)}${s.raceName}${s.name}が${DIR_NAMES[dir]}へ進軍（正面：${DIR_NAMES[dir]}）。`);
+      pushHistory(s,`${DIR_NAMES[dir]}へ進軍`);
+    } else {
+      const withMob=group.map(s=>({s,m:effStats(s).mob}));
+      withMob.sort((a,b)=>b.m-a.m);
+      const top=withMob[0].m;
+      const winners=withMob.filter(w=>w.m===top);
+      if(winners.length===1){
+        const w=winners[0].s;
+        const dir=directionBetweenHexes(w.col,w.row,w.plan.col,w.plan.row);
+        w.facing=dir; w.col=w.plan.col; w.row=w.plan.row;
+        addLog('move',`鉢合わせ！ ${sideLabel(w)}${w.raceName}${w.name}が行動力で押し勝ちマスを確保。`);
+        pushHistory(w,`鉢合わせで押し勝ち${DIR_NAMES[dir]}へ進軍`);
+        withMob.slice(1).forEach(l=>{ addLog('move',`${sideLabel(l.s)}${l.s.raceName}${l.s.name}はノックバックし停止。`); pushHistory(l.s,`鉢合わせでノックバック`); });
+      } else {
+        addLog('move','鉢合わせ！ 行動力が拮抗し正面衝突、双方その場に停止し損害を受けた。');
+        for(let i=0;i<winners.length;i++)for(let j=i+1;j<winners.length;j++){ clashDamage(winners[i].s,winners[j].s); }
+      }
+    }
+  });
+
+  // 2) attacks & skills (positions after movement)
+  const attackers=alive().filter(s=>s.plan && (s.plan.type==='attack'||s.plan.type==='skill'));
+  attackers.forEach(s=>{
+    if(s.plan.type==='skill'){
+      const csk=COMMANDER_SKILLS[s.commander];
+      if(csk && csk.type==='selfbuff'){ applyCommanderSelfBuff(s,csk); return; }
+      if(csk && csk.type==='teambuff'){ applyCommanderTeamBuff(s,csk); return; }
+      if(csk && csk.type==='moveattack'){ applyKirieSkill(s,csk); return; }
+      if(csk && csk.type==='allymove'){
+        const target=STATE.squads[s.plan.targetIdx];
+        if(target && target.alive && target.owner===s.owner) applyNalaSkill(s,csk,target);
+        return;
+      }
+    }
+    const target=STATE.squads[s.plan.targetIdx];
+    if(!target) return;
+    if(s.plan.type==='skill' && s.race.healSkill){
+      if(!target.alive || target.owner!==s.owner) return;
+      doHeal(s,target);
+      return;
+    }
+    if(!target.alive) return;
+    const d=hexDistance(s.col,s.row,target.col,target.row);
+    if(d<s.rangeMin || d>s.rangeMax){ addLog('atk',`${sideLabel(s)}${s.raceName}${s.name}の攻撃は射程外で不発。`); return; }
+    doAttack(s,target, s.plan.type==='skill');
+  });
+
+  // 3) rest
+  alive().filter(s=>s.plan && s.plan.type==='rest').forEach(s=>{
+    if(auraBlocksRest(s)){
+      addLog('rest',`${sideLabel(s)}${s.raceName}${s.name}は敵アフロディテの民の加護圏内で休憩できず、士気は回復しなかった。`);
+      pushHistory(s,'敵の加護で休憩を妨害された');
+      return;
+    }
+    const gain=8*s.restMult;
+    s.morale=Math.min(100,s.morale+gain);
+    s.hp=Math.min(s.maxHp,s.hp+Math.round(s.maxHp*0.02));
+    addLog('rest',`${sideLabel(s)}${s.raceName}${s.name}が休憩し士気+${Math.round(gain)}。`);
+    pushHistory(s,`休憩（士気+${Math.round(gain)}）`);
+  });
+  alive().filter(s=>s.plan && s.plan.type==='guard').forEach(s=>{
+    addLog('rest',`${sideLabel(s)}${s.raceName}${s.name}が自衛態勢（被ダメージ半減）。`);
+    pushHistory(s,'自衛態勢をとった');
+  });
+
+  // 3.5) passive regen/morale (アフロディテの民のHP自然回復、デュオニソスの民の士気自然上昇。行動に関わらず毎ターン)
+  alive().forEach(s=>{
+    if(s.race.passiveRegen){
+      const heal=Math.round(s.maxHp*s.race.passiveRegen);
+      if(s.hp<s.maxHp){ s.hp=Math.min(s.maxHp,s.hp+heal); addLog('rest',`${sideLabel(s)}${s.raceName}${s.name}は女神の恩恵で自然回復+${heal}。`); }
+    }
+    if(s.race.passiveMoraleRegen && s.morale<100){
+      s.morale=Math.min(100,s.morale+s.race.passiveMoraleRegen);
+      addLog('rest',`${sideLabel(s)}${s.raceName}${s.name}は酒神の恩恵で士気+${s.race.passiveMoraleRegen}。`);
+    }
+  });
+
+  // 4) desertion for low morale
+  alive().forEach(s=>{
+    if(s.morale<20){
+      const dmg = Math.round(s.maxHp * (s.moraleGuard?0.015:0.03));
+      s.hp=Math.max(0,s.hp-dmg);
+      applyMoraleLoss(s, s.moraleGuard?1:2);
+      addLog('desert',`${sideLabel(s)}${s.raceName}${s.name}は士気崩壊で脱走兵が発生（-${dmg}）。`);
+      pushHistory(s,`士気崩壊で脱走兵発生（-${dmg}）`);
+      checkDeath(s);
+    }
+  });
+
+  // 4.5) guard-break countdown
+  alive().forEach(s=>{
+    if(s.guardBrokenTurns>0) s.guardBrokenTurns--;
+    if(s.skillCooldown>0) s.skillCooldown--;
+    if(s.moveLockedTurns>0) s.moveLockedTurns--;
+    if(s.damageReductionTurns>0) s.damageReductionTurns--;
+    if(s.mobBuffTurns>0){ s.mobBuffTurns--; if(s.mobBuffTurns<=0) s.mobBuffMult=1; }
+    if(s.flightTurns>0) s.flightTurns--;
+    if(s.stealthTurns>0) s.stealthTurns--;
+    if(s.ignoreWeaponDemeritTurns>0) s.ignoreWeaponDemeritTurns--;
+    if(s.weaponDefBuffTurns>0) s.weaponDefBuffTurns--;
+    if(s.attackLockedTurns>0) s.attackLockedTurns--;
+    if(s.moraleImmuneTurns>0) s.moraleImmuneTurns--;
+    if(s.drunkenTurns>0) s.drunkenTurns--;
+    if(s.skillImmuneTurns>0) s.skillImmuneTurns--;
+  });
+
+  // reset plans
+  STATE.squads.forEach(s=>{ s.plan=null; s.actedThisTurn=false; });
+
+  // 5) advance clock
+  STATE.hour=(STATE.hour+1)%24;
+  if(STATE.hour===6){
+    STATE.day+=1;
+    rollWeather();
+  }
+  STATE.turnNum++;
+
+  // 6) win check
+  const p1Taisho=STATE.squads.find(s=>s.owner===1&&s.isTaisho);
+  const p2Taisho=STATE.squads.find(s=>s.owner===2&&s.isTaisho);
+  if(!p1Taisho.alive || !p2Taisho.alive){
+    STATE.over=true;
+    const won = STATE.mode==='online' ? (p1Taisho.alive? (STATE.online.myOwner===1) : (STATE.online.myOwner===2))
+                                       : p1Taisho.alive;
+    showResult(won);
+  }
+  STATE.selectedSquadId=null; STATE.pendingActionType=null;
+  renderAll();
+  if(TURN_HIT_FLAG) screenImpact();
+}
+function rollWeather(){
+  STATE.wind=Math.floor(Math.random()*6);
+  STATE.weather = Math.random()<0.25 ? '雨' : '晴れ';
+}
+
+function sideLabel(s){ return s.owner===1?'【味方1】':'【敵陣】'; }
+function clashDamage(a,b){
+  const ea=effStats(a), eb=effStats(b);
+  const dmgA=Math.round(20+ea.atk*0.15), dmgB=Math.round(20+eb.atk*0.15);
+  a.hp=Math.max(0,a.hp-dmgB); b.hp=Math.max(0,b.hp-dmgA);
+  applyMoraleLoss(a,3); applyMoraleLoss(b,3);
+  pushHistory(a,`${b.raceName}${b.name}と正面衝突（-${dmgB}）`);
+  pushHistory(b,`${a.raceName}${a.name}と正面衝突（-${dmgA}）`);
+  TURN_HIT_FLAG=true; playHitSfx();
+  checkDeath(a); checkDeath(b);
+}
+function checkDeath(s){ if(s.hp<=0 && s.alive){ s.alive=false; addLog('down',`${sideLabel(s)}${s.raceName}${s.name} 壊滅。`); pushHistory(s,'壊滅した'); } }
+
+/* ---- core damage formula ----
+   1.5 × (自部隊HPratio×士気ratio×攻撃値) ÷ (敵部隊HPratio×士気ratio×防御値) × 基準値
+   に向き補正・武器固有効果・地形/天候を掛け合わせる。基準値は10000兵を数ターンで削り合える値に調整。 */
+const DAMAGE_SCALE=950;
+function facingFactors(attacker,target,facingSource){
+  const src = facingSource||attacker;
+  const dirAtkToTarget = directionBetweenHexes(src.col,src.row,target.col,target.row);
+  const dirTargetToAtk = (dirAtkToTarget+3)%6;
+  const atkFacingDiff = angleDiff(src.facing, dirAtkToTarget);
+  const defFacingDiff = angleDiff(target.facing, dirTargetToAtk);
+  const atkFactor = atkFacingDiff===0?1.2 : atkFacingDiff===1?1.05 : atkFacingDiff===2?0.95:0.85;
+  let defTakenFactor = defFacingDiff===0?0.75 : defFacingDiff===1?0.9 : defFacingDiff===2?1.15:1.4;
+  return {atkFactor,defTakenFactor,defFacingDiff};
+}
+function computeDamage(attacker,target,atkStatOverride,facingSource,skillMult,extraIgnoreDef){
+  const ea=effStats(attacker), ed=effStats(target);
+  let atkStat = (atkStatOverride!=null? atkStatOverride : ea.atk) * (skillMult||1);
+  let defStat = ed.def;
+  if(attacker.ignoreDef) defStat *= (1-attacker.ignoreDef);
+  if(extraIgnoreDef) defStat *= (1-extraIgnoreDef);
+
+  // 弓：地形・天候・風向き
+  if(attacker.variableTerrain){
+    const terrainAtk=terrainAt(attacker.col,attacker.row), terrainDef=terrainAt(target.col,target.row);
+    if(terrainAtk==='hill') atkStat*=1.2;
+    if(terrainDef==='forest') atkStat*=0.5;
+    const dirAtkToTarget=directionBetweenHexes(attacker.col,attacker.row,target.col,target.row);
+    const windAlign=angleDiff(dirAtkToTarget,STATE.wind);
+    if(windAlign===0) atkStat*=1.15; else if(windAlign===3) atkStat*=0.85;
+    if(STATE.weather==='雨') atkStat*=0.85;
+  }
+  if(terrainAt(target.col,target.row)==='hill') defStat*=1.15;
+
+  const {atkFactor,defTakenFactor,defFacingDiff} = facingFactors(attacker,target,facingSource);
+  let finalDefFactor = defTakenFactor;
+  if(target.plan && target.plan.type==='guard') finalDefFactor*=0.5; // 盾の自衛
+  if(target.damageReductionTurns>0) finalDefFactor*=0.6; // バルドの戦術「鉄壁」
+
+  let dmg = 1.5 * (atkStat/Math.max(8,defStat)) * DAMAGE_SCALE * atkFactor * finalDefFactor;
+  dmg *= (0.9+Math.random()*0.2);
+  dmg = Math.max(50,Math.round(dmg));
+  return {dmg, defFacingDiff};
+}
+
+function doAttack(attacker,target,isSkill){
+  if(attacker.attackLockedTurns>0){
+    addLog('atk',`${sideLabel(attacker)}${attacker.raceName}${attacker.name}は「惑器」で行動不能のため攻撃できなかった。`);
+    pushHistory(attacker,'「惑器」の影響で攻撃不能');
+    return;
+  }
+  const csk = isSkill ? COMMANDER_SKILLS[attacker.commander] : null;
+  const isCommanderAtkSkill = csk && csk.type==='attack';
+  let skillMult=1.0, extraIgnoreDef=0;
+  if(isSkill){
+    if(isCommanderAtkSkill){
+      skillMult = csk.calcMult(attacker,target);
+      extraIgnoreDef = csk.extraIgnoreDef||0;
+    } else {
+      skillMult=1.8;
+      if(attacker.race.skillAmp) skillMult = 1+(skillMult-1)*attacker.race.skillAmp;
+    }
+  }
+  if(!isSkill){ attacker.attackCount=(attacker.attackCount||0)+1; }
+  const {dmg, defFacingDiff} = computeDamage(attacker,target,null,attacker,skillMult,extraIgnoreDef);
+
+  // シルフィの戦術「飛翔」／バックスの戦術「鉄甲」：条件を満たす攻撃を無効化
+  const evadedFlight = target.flightTurns>0 && !isSkill && !attacker.variableTerrain && !attacker.guardCounter;
+  const evadedIronArmor = isSkill && target.skillImmuneTurns>0;
+  const evaded = evadedFlight || evadedIronArmor;
+  const finalDmg = evaded? 0 : dmg;
+  target.hp=Math.max(0,target.hp-finalDmg);
+  if(!evaded && finalDmg>0){ target.timesHit=(target.timesHit||0)+1; } // ミューラ「堅忍」用のカウント
+  TURN_HIT_FLAG=true; playHitSfx();
+  attacker.facing = directionBetweenHexes(attacker.col,attacker.row,target.col,target.row); // 攻撃時も正面が対象方向へ変わる
+
+  let atkMoraleCost = isSkill? 10 : 4;
+  if(!isSkill && attacker.atkMoraleCost) atkMoraleCost += attacker.atkMoraleCost;
+  if(isSkill && attacker.race.skillMoraleCostMult) atkMoraleCost = Math.round(atkMoraleCost*attacker.race.skillMoraleCostMult);
+  applyMoraleLoss(attacker, atkMoraleCost);
+  if(!evaded) applyMoraleLoss(target, defFacingDiff>=2?10:6);
+
+  if(isCommanderAtkSkill && csk.selfCostRatio){
+    const cost=Math.round(attacker.maxHp*csk.selfCostRatio);
+    attacker.hp=Math.max(1,attacker.hp-cost);
+    addLog('atk',`${sideLabel(attacker)}${attacker.raceName}${attacker.name}は「${csk.name}」の代償で自ら${cost}のダメージを負った。`);
+    pushHistory(attacker,`戦術「${csk.name}」の代償で自傷（-${cost}）`);
+  }
+  if(isCommanderAtkSkill && csk.selfEffect) csk.selfEffect(attacker);
+  if(isSkill){ attacker.skillCooldown = attacker.race.skillCooldown||3; }
+  if(!evaded && attacker.guardBreak && target.canGuard){ target.guardBrokenTurns=2; }
+
+  const facingNote = defFacingDiff===0?'正面から':defFacingDiff===3?'背後から！':defFacingDiff===1?'斜め前から':'側面から';
+  const guardNote = (target.plan&&target.plan.type==='guard')?'（自衛中で被害半減）':'';
+  const skillNameNote = isCommanderAtkSkill? `戦術「${csk.name}」で` : (isSkill?'戦術で':'');
+  if(evaded){
+    const reason = evadedIronArmor? '「鉄甲」で無効化した' : '「飛翔」で回避した';
+    addLog('atk',`${sideLabel(attacker)}${attacker.raceName}${attacker.name}(${attacker.weaponLabel})が${facingNote}攻撃！ しかし${sideLabel(target)}${target.raceName}${target.name}は${reason}。`);
+    pushHistory(attacker,`${target.raceName}${target.name}への攻撃は${reason}`);
+    pushHistory(target,`${attacker.raceName}${attacker.name}の攻撃を${reason}`);
+  } else {
+    addLog('atk',`${sideLabel(attacker)}${attacker.raceName}${attacker.name}(${attacker.weaponLabel})が${skillNameNote}${facingNote}攻撃！ ${sideLabel(target)}${target.raceName}${target.name}に${finalDmg}ダメージ${guardNote}。`);
+    if(isCommanderAtkSkill && csk.extraIgnoreDef) addLog('atk',`（${csk.name}の効果で敵防御の${Math.round(csk.extraIgnoreDef*100)}%を無視した）`);
+    if(attacker.guardBreak && target.canGuard) addLog('atk',`${sideLabel(target)}${target.raceName}${target.name}はガードを崩され2ターン自衛不可に！`);
+    pushHistory(attacker,`${target.raceName}${target.name}を${facingNote}攻撃（${finalDmg}ダメージ）`);
+    pushHistory(target,`${attacker.raceName}${attacker.name}から${facingNote.replace('から','')}攻撃を受けた（${finalDmg}ダメージ${guardNote}）`);
+  }
+  checkDeath(target);
+  if(!evaded && target.drunkenTurns>0 && attacker.alive){
+    attacker.moveLockedTurns=Math.max(attacker.moveLockedTurns||0,3);
+    addLog('atk',`${sideLabel(target)}${target.raceName}${target.name}の「泥酔」で${sideLabel(attacker)}${attacker.raceName}${attacker.name}は2ターン足止めされた。`);
+    pushHistory(attacker,`${target.raceName}${target.name}の「泥酔」で足止めされた`);
+  }
+  if(isCommanderAtkSkill && csk.selfEffect){ addLog('atk',`${sideLabel(attacker)}${attacker.raceName}${attacker.name}は「${csk.name}」の反動で次ターン動けない。`); }
+  if(!evaded && isCommanderAtkSkill && csk.doubleHit && target.alive){
+    const second = computeDamage(attacker,target,null,attacker,skillMult,extraIgnoreDef);
+    target.hp=Math.max(0,target.hp-second.dmg);
+    TURN_HIT_FLAG=true; playHitSfx();
+    addLog('atk',`${sideLabel(attacker)}${attacker.raceName}${attacker.name}の「${csk.name}」二段目！ ${sideLabel(target)}${target.raceName}${target.name}にさらに${second.dmg}ダメージ。`);
+    pushHistory(attacker,`「${csk.name}」二段目で${target.raceName}${target.name}にさらに${second.dmg}ダメージ`);
+    checkDeath(target);
+  }
+  if(!evaded && isCommanderAtkSkill && csk.targetEffect && target.alive){
+    csk.targetEffect(target);
+    const msg = csk.targetEffectMsg || '効果を受けた';
+    addLog('atk',`${sideLabel(target)}${target.raceName}${target.name}は「${csk.name}」で${msg}`);
+    pushHistory(target,`「${csk.name}」で${msg}`);
+  }
+
+  // 槍の護衛反撃：盾が殴られた瞬間、隣接する味方の槍が代わりに反撃（自身は無傷）
+  if(!evaded && target.canGuard){
+    const guards=STATE.squads.filter(g=>g.alive && g.owner===target.owner && g!==target && g.guardCounter &&
+      hexDistance(g.col,g.row,target.col,target.row)===1);
+    guards.forEach(spear=>{
+      const {dmg:cdmg} = computeDamage(spear,attacker,null,target,1);
+      attacker.hp=Math.max(0,attacker.hp-cdmg);
+      TURN_HIT_FLAG=true; playHitSfx();
+      addLog('atk',`${sideLabel(spear)}${spear.raceName}${spear.name}が隣接する盾部隊を庇って反撃！（自身は無傷） ${sideLabel(attacker)}${attacker.raceName}${attacker.name}に${cdmg}ダメージ。`);
+      pushHistory(spear,`${target.raceName}${target.name}を庇い${attacker.raceName}${attacker.name}へ反撃（${cdmg}ダメージ・自身は無傷）`);
+      pushHistory(attacker,`${spear.raceName}${spear.name}の護衛反撃を受けた（${cdmg}ダメージ）`);
+      checkDeath(attacker);
+    });
+  }
+}
+
+function applyCommanderSelfBuff(caster,csk){
+  csk.apply(caster);
+  caster.skillCooldown = caster.race.skillCooldown||3;
+  addLog('atk',`${sideLabel(caster)}${caster.raceName}${caster.name}の戦術「${csk.name}」発動！ ${csk.desc}`);
+  pushHistory(caster,`戦術「${csk.name}」を発動`);
+}
+function applyCommanderTeamBuff(caster,csk){
+  if(csk.extraCondition && !csk.extraCondition(caster)){
+    addLog('atk',`${sideLabel(caster)}${caster.raceName}${caster.name}は「${csk.name}」の発動条件を満たせず不発。`);
+    caster.skillCooldown = caster.race.skillCooldown||3;
+    return;
+  }
+  csk.apply(caster);
+  caster.skillCooldown = caster.race.skillCooldown||3;
+  addLog('atk',`${sideLabel(caster)}${caster.raceName}${caster.name}の戦術「${csk.name}」発動！ ${csk.desc}`);
+  pushHistory(caster,`戦術「${csk.name}」を発動（味方全体）`);
+}
+function applyRudraReposition(caster){
+  const foes=STATE.squads.filter(t=>t.alive && t.owner!==caster.owner && squadVisibleTo(t,caster.owner));
+  if(!foes.length){ addLog('move',`${sideLabel(caster)}${caster.raceName}${caster.name}の「春嵐」は近くに敵がおらず不発。`); return; }
+  foes.sort((a,b)=>hexDistance(caster.col,caster.row,a.col,a.row)-hexDistance(caster.col,caster.row,b.col,b.row));
+  const occ=new Set(STATE.squads.filter(s=>s.alive).map(s=>s.col+'_'+s.row));
+  occ.delete(caster.col+'_'+caster.row);
+  for(const target of foes){
+    const rearDir=(target.facing+3)%6;
+    const candidates=[rearDir, (rearDir+1)%6, (rearDir+5)%6]; // 背後優先、だめなら隣接する斜め後ろ
+    for(const dir of candidates){
+      const [nc,nr]=neighbor(target.col,target.row,dir);
+      if(nc<0||nc>=COLS||nr<0||nr>=ROWS) continue;
+      const key=nc+'_'+nr;
+      if(occ.has(key)) continue;
+      caster.col=nc; caster.row=nr;
+      caster.facing=directionBetweenHexes(nc,nr,target.col,target.row);
+      addLog('move',`${sideLabel(caster)}${caster.raceName}${caster.name}が「春嵐」で${target.raceName}${target.name}の背後へ回り込んだ！`);
+      pushHistory(caster,`「春嵐」で${target.raceName}${target.name}の背後へ移動`);
+      return;
+    }
+  }
+  addLog('move',`${sideLabel(caster)}${caster.raceName}${caster.name}の「春嵐」は近くに空きマスがなく不発。`);
+}
+function applyKirieSkill(caster,csk){
+  const dest=caster.plan;
+  if(!dest || dest.col==null || dest.row==null){ return; }
+  const occ=new Set(STATE.squads.filter(sq=>sq.alive).map(sq=>sq.col+'_'+sq.row));
+  occ.delete(caster.col+'_'+caster.row);
+  const reach=reachableHexes(caster.col,caster.row,moveSteps(caster),occ);
+  if(!reach.some(h=>h.col===dest.col&&h.row===dest.row)){
+    addLog('atk',`${sideLabel(caster)}${caster.raceName}${caster.name}の「${csk.name}」は移動先が無効で不発。`);
+    return;
+  }
+  const dir=directionBetweenHexes(caster.col,caster.row,dest.col,dest.row);
+  caster.facing=dir; caster.col=dest.col; caster.row=dest.row;
+  addLog('move',`${sideLabel(caster)}${caster.raceName}${caster.name}が「${csk.name}」で${DIR_NAMES[dir]}へ疾駆！`);
+  pushHistory(caster,`戦術「${csk.name}」で${DIR_NAMES[dir]}へ移動`);
+  const foes=enemySquads(caster.owner).filter(t=>t.alive && squadVisibleTo(t,caster.owner) && hexDistance(caster.col,caster.row,t.col,t.row)<=2);
+  foes.sort((a,b)=>hexDistance(caster.col,caster.row,a.col,a.row)-hexDistance(caster.col,caster.row,b.col,b.row));
+  const picked=foes.slice(0,2);
+  if(!picked.length){
+    addLog('atk',`${sideLabel(caster)}${caster.raceName}${caster.name}の周囲に敵部隊がおらず「${csk.name}」の追撃は不発。`);
+  }
+  picked.forEach(t=>{
+    const {dmg,defFacingDiff}=computeDamage(caster,t,null,caster,1.6);
+    t.hp=Math.max(0,t.hp-dmg);
+    TURN_HIT_FLAG=true; playHitSfx();
+    applyMoraleLoss(t, defFacingDiff>=2?10:6);
+    addLog('atk',`${sideLabel(caster)}${caster.raceName}${caster.name}の「${csk.name}」が${sideLabel(t)}${t.raceName}${t.name}に${dmg}ダメージ！`);
+    pushHistory(caster,`「${csk.name}」で${t.raceName}${t.name}を攻撃（${dmg}ダメージ）`);
+    pushHistory(t,`${caster.raceName}${caster.name}の「${csk.name}」で${dmg}ダメージを受けた`);
+    checkDeath(t);
+  });
+  if(picked.length) caster.facing=directionBetweenHexes(caster.col,caster.row,picked[0].col,picked[0].row);
+  applyMoraleLoss(caster,8);
+  caster.skillCooldown = caster.race.skillCooldown||3;
+}
+function applyNalaSkill(caster,csk,target){
+  const occ=new Set(STATE.squads.filter(sq=>sq.alive).map(sq=>sq.col+'_'+sq.row));
+  occ.delete(caster.col+'_'+caster.row);
+  const candidates=neighborsOf(target.col,target.row).filter(n=>!occ.has(n.col+'_'+n.row));
+  caster.skillCooldown = caster.race.skillCooldown||3;
+  if(!candidates.length){
+    addLog('move',`${sideLabel(caster)}${caster.raceName}${caster.name}の「${csk.name}」は${target.raceName}${target.name}の周囲に空きがなく不発。`);
+    return;
+  }
+  const pick=candidates[Math.floor(Math.random()*candidates.length)];
+  const dir=directionBetweenHexes(caster.col,caster.row,pick.col,pick.row);
+  caster.col=pick.col; caster.row=pick.row; caster.facing=dir;
+  addLog('move',`${sideLabel(caster)}${caster.raceName}${caster.name}が「${csk.name}」で${target.raceName}${target.name}の側へ移動した。`);
+  pushHistory(caster,`「${csk.name}」で${target.raceName}${target.name}の周囲へ移動`);
+  applyMoraleLoss(caster,4);
+}
+function doHeal(healer,target){
+  const e=effStats(healer);
+  let amp = healer.race.skillAmp||1;
+  let healAmt = Math.round(e.atk * 9 * amp * (0.85+Math.random()*0.3));
+  target.hp=Math.min(target.maxHp,target.hp+healAmt);
+  let cost=10;
+  if(healer.race.skillMoraleCostMult) cost=Math.round(cost*healer.race.skillMoraleCostMult);
+  applyMoraleLoss(healer,cost);
+  healer.skillCooldown = healer.race.skillCooldown||3;
+  addLog('atk',`${sideLabel(healer)}${healer.raceName}${healer.name}の戦術「治癒」！ ${sideLabel(target)}${target.raceName}${target.name}の兵が${healAmt}回復。`);
+  pushHistory(healer,`${target.raceName}${target.name}を治癒（+${healAmt}）`);
+  pushHistory(target,`${healer.raceName}${healer.name}に治癒された（+${healAmt}）`);
+}
+
+function showResult(won){
+  const ov=document.getElementById('result-overlay');
+  ov.className='result-overlay active '+(won?'win':'lose');
+  document.getElementById('result-title').textContent = won?'勝利':'敗北';
+  document.getElementById('result-desc').textContent = won? '敵大将部隊を撃破した。':'大将部隊が壊滅した。';
+  stopBGM();
+  playFanfare(won);
+}
+
+/* ======================================================================
+   Online (shared persistent storage, polling)
+   ====================================================================== */
+let onlinePollTimer=null;
+async function submitOnlineSetup(){
+  const key=SETUP.roomCode;
+  try{
+    let room = await safeGet(key,true);
+    if(!room){
+      room = { status:'waiting', p1:{raceId:SETUP.race,cfgs:SETUP.squads}, p2:null, state:null, turnActions:{} };
+      await window.storage.set(key, JSON.stringify(room), true);
+      SETUP.isHost=true;
+    } else {
+      if(room.status==='waiting' && !room.p2){
+        room.p2={raceId:SETUP.race,cfgs:SETUP.squads};
+        room.status='ready';
+        await window.storage.set(key, JSON.stringify(room), true);
+        SETUP.isHost=false;
+      } else {
+        SETUP.isHost = room.status==='waiting';
+      }
+    }
+  }catch(e){ console.error(e); }
+  document.getElementById('phase-label') && null;
+  showScreen('screen-battle');
+  document.getElementById('net-status').textContent='相手の入室を待っています…';
+  pollOnlineSetup();
+}
+async function pollOnlineSetup(){
+  const key=SETUP.roomCode;
+  onlinePollTimer=setInterval(async ()=>{
+    if(STATE) { clearInterval(onlinePollTimer); return; }
+    const room=await safeGet(key,true);
+    if(room && room.p1 && room.p2 && !STATE){
+      clearInterval(onlinePollTimer);
+      if(SETUP.isHost && !room.state){
+        initBattle({p1:{raceId:room.p1.raceId,cfgs:room.p1.cfgs,isCPU:false}, p2:{raceId:room.p2.raceId,cfgs:room.p2.cfgs,isCPU:false}, mode:'online'});
+        await pushOnlineState();
+      } else if(room.state){
+        loadOnlineState(room.state);
+      }
+    }
+  },2500);
+}
+async function safeGet(key,shared){
+  try{ const r=await window.storage.get(key,shared); return r? JSON.parse(r.value): null; }catch(e){ return null; }
+}
+function serializeState(){
+  return {
+    hour:STATE.hour, day:STATE.day, turnNum:STATE.turnNum, map:STATE.map,
+    wind:STATE.wind, weather:STATE.weather, teamAtkBonus:STATE.teamAtkBonus,
+    squads:STATE.squads.map(s=>({...s,plan:null})), log:STATE.log, over:STATE.over,
+  };
+}
+function loadOnlineState(s){
+  const wasNull = !STATE;
+  STATE = STATE || {};
+  Object.assign(STATE,{
+    mode:'online', hour:s.hour, day:s.day, turnNum:s.turnNum, map:s.map,
+    wind: s.wind!=null?s.wind:0, weather: s.weather||'晴れ', teamAtkBonus: s.teamAtkBonus||{1:0,2:0},
+    squads:s.squads, log:[], over:s.over,
+    p1isCPU:false,p2isCPU:false,
+    selectedSquadId:null, pendingActionType:null,
+    online:{room:SETUP.roomCode, isHost:SETUP.isHost, myOwner: SETUP.isHost?1:2},
+  });
+  document.getElementById('log-scroll').innerHTML='';
+  s.log.forEach(l=>addLog(l.kind,l.msg));
+  showScreen('screen-battle');
+  renderAll();
+  if(!onlineTurnPoll) startOnlinePolling();
+}
+let onlineTurnPoll=null;
+function startOnlinePolling(){
+  if(onlineTurnPoll) return;
+  onlineTurnPoll=setInterval(async ()=>{
+    if(!STATE || STATE.mode!=='online') return;
+    const room=await safeGet(STATE.online.room,true);
+    if(!room) return;
+    const myOwner=STATE.online.myOwner, oppOwner=enemyOwnerOf(myOwner);
+    const actions=room.turnActions||{};
+    if(actions['p'+oppOwner] && actions['p'+oppOwner].turnNum===STATE.turnNum){
+      // opponent submitted; if I already submitted too, host resolves
+      if(actions['p'+myOwner] && actions['p'+myOwner].turnNum===STATE.turnNum){
+        if(STATE.online.isHost){
+          applyPlans(actions['p1'].plans,1); applyPlans(actions['p2'].plans,2);
+          resolveTurn();
+          room.turnActions={};
+          room.state=serializeState();
+          await window.storage.set(STATE.online.room, JSON.stringify(room), true);
+        }
+      }
+    }
+    if(room.state && room.state.turnNum!==STATE.turnNum){
+      loadOnlineState(room.state);
+    }
+  },2500);
+}
+function stopOnlinePolling(){
+  if(onlinePollTimer){ clearInterval(onlinePollTimer); onlinePollTimer=null; }
+  if(onlineTurnPoll){ clearInterval(onlineTurnPoll); onlineTurnPoll=null; }
+}
+function applyPlans(plans,owner){
+  STATE.squads.filter(s=>s.owner===owner).forEach((s,i)=>{ s.plan=plans[i]; });
+}
+async function pushOnlineState(){
+  const room=await safeGet(STATE.online.room,true) || {};
+  room.state=serializeState();
+  room.turnActions=room.turnActions||{};
+  await window.storage.set(STATE.online.room, JSON.stringify(room), true);
+}
+async function submitOnlineTurn(){
+  document.getElementById('net-status').textContent='行動を送信、相手を待っています…';
+  const myOwner=STATE.online.myOwner;
+  const plans=STATE.squads.filter(s=>s.owner===myOwner).map(s=>s.plan);
+  try{
+    const room=await safeGet(STATE.online.room,true) || {turnActions:{}};
+    room.turnActions=room.turnActions||{};
+    room.turnActions['p'+myOwner]={turnNum:STATE.turnNum,plans};
+    await window.storage.set(STATE.online.room, JSON.stringify(room), true);
+  }catch(e){ console.error(e); }
+}
+</script>
+</body>
+</html>
